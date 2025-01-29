@@ -1,2 +1,2 @@
-# GPT-TDAH
+# SMART-TDAH
  TFG Ángel Álvarez Rey
