@@ -10,7 +10,7 @@ const Banner = () => {
   const isDarkMode = colorMode.mode === 'dark';
 
   // Estado para el idioma y el menú de selección de idioma
-  const { language, changeLanguage } = useLanguage();
+  const { changeLanguage } = useLanguage();
   const [anchorEl, setAnchorEl] = useState(null);
 
   // Abre el menú de idiomas

@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Link } from '@mui/material';
+import { Container, TextField, Button, Typography, Box } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const Login = ({ setIsLoggedIn }) => {
+const SignUp = () => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/login', { email, password });
-      localStorage.setItem('token', response.data.token); 
-      setIsLoggedIn(true); // Actualizar el estado de autenticación
-      navigate('/'); // Redirigir al usuario a la página principal
+      const response = await axios.post('http://localhost:3001/signup', { username, email, password });
+      console.log('User registered:', response.data);
+      // Redirigir al usuario a la página de inicio de sesión
+      navigate('/login');
     } catch (err) {
-      setError('Invalid credentials');
+      setError('Error registering new user');
     }
   };
 
@@ -32,9 +33,21 @@ const Login = ({ setIsLoggedIn }) => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Sign In
+          Sign Up
         </Typography>
-        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSignUp} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
           <TextField
             margin="normal"
             required
@@ -43,7 +56,6 @@ const Login = ({ setIsLoggedIn }) => {
             label="Email Address"
             name="email"
             autoComplete="email"
-            autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -65,19 +77,13 @@ const Login = ({ setIsLoggedIn }) => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign In
+            Sign Up
           </Button>
           {error && <Typography color="error">{error}</Typography>}
-          <Typography variant="body2">
-            {"Don't have an account? "}
-            <Link href="#" onClick={() => navigate('/signup')}>
-              Sign Up
-            </Link>
-          </Typography>
         </Box>
       </Box>
     </Container>
   );
 };
 
-export default Login;
+export default SignUp;
