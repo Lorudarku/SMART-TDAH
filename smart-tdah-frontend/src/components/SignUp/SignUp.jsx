@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import {backendUrl} from '../../utils/constants'
 
 const SignUp = () => {
   const [username, setUsername] = useState('');
@@ -13,7 +14,7 @@ const SignUp = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/signup', { username, email, password });
+      const response = await axios.post(`${backendUrl}/signup`, { username, email, password });
       console.log('User registered:', response.data);
       // Redirigir al usuario a la página de inicio de sesión
       navigate('/login');
@@ -33,7 +34,7 @@ const SignUp = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Sign Up
+          <h1>Sign Up</h1>
         </Typography>
         <Box component="form" onSubmit={handleSignUp} noValidate sx={{ mt: 1 }}>
           <TextField

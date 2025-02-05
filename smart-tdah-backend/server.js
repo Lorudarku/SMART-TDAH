@@ -71,6 +71,24 @@ app.post('/login', async (req, res) => {
   }
 });
 
+  //Funcion checkToken
+  const checkToken = (req, res, next) => {
+    const authHeader = req.get('Authorization');
+    if (!authHeader) {
+      res.status(401).send('Unauthorized');
+      return;
+    }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.userId = payload.userId;
+    next();
+  } catch (err) {
+    res.status(403).send('Forbidden');
+  }
+};
+
 // Iniciar el servidor
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

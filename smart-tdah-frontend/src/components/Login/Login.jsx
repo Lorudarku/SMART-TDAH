@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Link } from '@mui/material';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Container, TextField, Button, Typography, Box, Link } from '@mui/material';
+import {backendUrl} from '../../utils/constants'
+import styles from './login.module.scss'
 
 const Login = ({ setIsLoggedIn }) => {
   const [email, setEmail] = useState('');
@@ -12,7 +14,7 @@ const Login = ({ setIsLoggedIn }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/login', { email, password });
+      const response = await axios.post(`${backendUrl}/login`, { email, password });
       localStorage.setItem('token', response.data.token); 
       setIsLoggedIn(true); // Actualizar el estado de autenticación
       navigate('/'); // Redirigir al usuario a la página principal
@@ -32,7 +34,7 @@ const Login = ({ setIsLoggedIn }) => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Sign In
+          <h1>Sign In </h1>
         </Typography>
         <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
           <TextField
@@ -65,13 +67,13 @@ const Login = ({ setIsLoggedIn }) => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign In
+           <p className={styles.singInButton}>Sign In</p>
           </Button>
           {error && <Typography color="error">{error}</Typography>}
           <Typography variant="body2">
             {"Don't have an account? "}
             <Link href="#" onClick={() => navigate('/signup')}>
-              Sign Up
+              <p className={styles.link}>Sign Up </p>
             </Link>
           </Typography>
         </Box>

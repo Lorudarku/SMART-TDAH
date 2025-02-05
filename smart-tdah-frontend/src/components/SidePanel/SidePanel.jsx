@@ -1,9 +1,9 @@
 // src/components/SidePanel.js
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, IconButton, Divider } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
 const SidePanel = () => {

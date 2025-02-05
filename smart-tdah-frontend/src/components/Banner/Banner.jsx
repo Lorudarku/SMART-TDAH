@@ -2,15 +2,16 @@
 import React, { useContext, useState } from 'react'; // Import useState here
 import { AppBar, Toolbar, Typography, Switch, IconButton, Menu, MenuItem } from '@mui/material'; // Include IconButton, Menu, MenuItem
 import { WbSunny, NightlightRound, Language } from '@mui/icons-material'; // Include Language icon
-import { ColorModeContext } from '../App';
-import { useLanguage } from './LanguageContext';
+import { ColorModeContext } from '../../App';
+import { useLanguage } from '../../hooks/LanguageContext';
+import styles from './banner.module.scss'
 
 const Banner = () => {
   const colorMode = useContext(ColorModeContext);
   const isDarkMode = colorMode.mode === 'dark';
 
   // Estado para el idioma y el menú de selección de idioma
-  const { changeLanguage } = useLanguage();
+  const { changeLanguage, language } = useLanguage();
   const [anchorEl, setAnchorEl] = useState(null);
 
   // Abre el menú de idiomas
@@ -30,7 +31,7 @@ const Banner = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#CD6A2E" }}>
+    <AppBar position="static" sx={{ backgroundColor: "#6f6f6f" }}>
       <Toolbar>
 
         {/* Botón para cambiar de idioma */}
@@ -41,6 +42,7 @@ const Banner = () => {
           sx={{ mr: 2 }}
         >
           <Language />
+          <i className={styles.language}>{language}</i>
         </IconButton>
 
         {/* Menú desplegable para seleccionar idioma */}
@@ -56,7 +58,7 @@ const Banner = () => {
 
         {/* Título de la aplicación */}
         <Typography variant="h6" style={{ flexGrow: 1 }}>
-          GPT-TDAH
+          SMART-TDAH
         </Typography>
 
         {/* Switch para cambiar entre el tema claro y oscuro */}

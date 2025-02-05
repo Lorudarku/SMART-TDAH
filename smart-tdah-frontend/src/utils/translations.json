@@ -1,0 +1,14 @@
+{
+    "es": {
+      "welcome": "Bienvenido al Panel Principal",
+      "description": "Este es el contenido principal que se muestra después de iniciar sesión."
+    },
+    "en": {
+      "welcome": "Welcome to the Main Panel",
+      "description": "This is the main content displayed after logging in."
+    },
+    "pt": {
+      "welcome": "Bem-vindo ao Painel Principal",
+      "description": "Este é o conteúdo principal exibido após o login."
+    }
+}
