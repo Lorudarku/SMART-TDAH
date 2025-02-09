@@ -2,9 +2,11 @@
 import React, { useContext, useState } from 'react'; // Import useState here
 import { AppBar, Toolbar, Typography, Switch, IconButton, Menu, MenuItem } from '@mui/material'; // Include IconButton, Menu, MenuItem
 import { WbSunny, NightlightRound, Language } from '@mui/icons-material'; // Include Language icon
+import { Link } from 'react-router-dom';
 import { ColorModeContext } from '../../App';
 import { useLanguage } from '../../hooks/LanguageContext';
 import styles from './banner.module.scss'
+
 
 const Banner = () => {
   const colorMode = useContext(ColorModeContext);
@@ -58,7 +60,9 @@ const Banner = () => {
 
         {/* Título de la aplicación */}
         <Typography variant="h6" style={{ flexGrow: 1 }}>
-          SMART-TDAH
+          <Link to="/" className={styles.clickableTitle}>
+            SMART-TDAH
+          </Link>
         </Typography>
 
         {/* Switch para cambiar entre el tema claro y oscuro */}

@@ -4,6 +4,10 @@ import AlumnoLink from '../AlumnoLink/AlumnoLink';
 const Alumnos = ["juan", "jose", "diego", "pepiño", "pedro", "gerbasio", "pepa", "sabado"];
 
 function AlumnoList() {
+    const handleAlumnoClick = (nombre) => {
+        console.log(`Alumno ${nombre} clicked`);
+    };
+
     return (
         <div className={styles.AlumnoContainer}>
             <h1>Lista de alumnos</h1>
@@ -11,6 +15,7 @@ function AlumnoList() {
                 {Alumnos.map((alumno) => (
                     <AlumnoLink key={alumno}
                         nombre={alumno}
+                        onClick={handleAlumnoClick}
                     />
                 ))}
             </div>
