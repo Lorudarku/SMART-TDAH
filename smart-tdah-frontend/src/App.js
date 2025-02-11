@@ -1,13 +1,13 @@
 // src/App.js
 import React, { useState, createContext, useMemo } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { LanguageProvider } from './hooks/LanguageContext'; 
 import Banner from "./components/Banner/Banner";
 import Login from "./components/Login/Login";
 import SignUp from "./components/SignUp/SignUp";
 import HomePage from "./pages/HomePage/HomePage"
 import SidePanel from "./components/SidePanel/SidePanel";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { LanguageProvider } from './hooks/LanguageContext'; // Importamos el hook de idioma
 import AlumnoList from "./components/AlumnoList/AlumnoList";
 
 
@@ -52,8 +52,8 @@ function App() {
       <LanguageProvider>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Banner />
           <Router>
+            <Banner />
             <Routes>
               <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} /> 
               <Route path="/signup" element={<SignUp />} />
