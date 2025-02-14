@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './AlumnoLink.module.scss';
+import { Link } from "react-router";
 
 function AlumnoLink({nombre, onClick}) {
     const getInitials = (name) => {
@@ -20,11 +21,19 @@ function AlumnoLink({nombre, onClick}) {
     const backgroundColor = getRandomColor();
 
     return (
-        <div className={styles.AlumnoContainer} onClick={() => onClick(nombre)}>
-            <div className={styles.ProfileImage} style={{ backgroundColor }}>
-                {initials}
-            </div>
-            <h1 className={styles.AlumnoName}>{nombre}</h1>
+        <div className={styles.AlumnoContainer}>
+            <Link className={styles.AlumnoLink} 
+                to={{
+                    pathname: `/alumnos/${nombre}`,
+                }}
+            >
+                <div className={styles.Alumno}>
+                    <div className={styles.ProfileImage} style={{ backgroundColor }}>
+                        {initials}
+                    </div>
+                    <h1 className={styles.AlumnoName}>{nombre}</h1>
+                </div>
+            </Link>
         </div>
     )
 }

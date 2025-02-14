@@ -1,4 +1,4 @@
-.AlumnoContainer{
+.Alumno{
     display: flex;
     align-items: center;
     margin: 10px;
@@ -7,6 +7,11 @@
     padding: 10px;
 
     cursor:pointer;
+}
+
+.AlumnoLink{
+    text-decoration: none;
+    color: black;
 }
 
 .ProfileImage {

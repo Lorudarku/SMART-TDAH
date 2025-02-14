@@ -1,16 +1,17 @@
 // src/components/Banner.js
 import React, { useContext, useState } from 'react'; // Import useState here
 import { AppBar, Toolbar, Typography, Switch, IconButton, Menu, MenuItem } from '@mui/material'; // Include IconButton, Menu, MenuItem
-import { WbSunny, NightlightRound, Language } from '@mui/icons-material'; // Include Language icon
-import { Link } from 'react-router-dom';
+import { WbSunny, NightlightRound, Language, Logout } from '@mui/icons-material'; // Include Language icon
+import { Link, useNavigate } from 'react-router-dom';
 import { ColorModeContext } from '../../App';
 import { useLanguage } from '../../hooks/LanguageContext';
 import styles from './banner.module.scss'
 
 
-const Banner = () => {
+const Banner = ({ setIsLoggedIn }) => {
   const colorMode = useContext(ColorModeContext);
   const isDarkMode = colorMode.mode === 'dark';
+  const navigate = useNavigate();
 
   // Estado para el idioma y el menú de selección de idioma
   const { changeLanguage, language } = useLanguage();
@@ -30,6 +31,18 @@ const Banner = () => {
   const handleLanguageChange = (lang) => {
     changeLanguage(lang);
     handleLanguageMenuClose();
+  };
+
+  // Maneja el cierre de sesión
+  const handleLogout = () => {
+    // Eliminar el token de autenticación
+    localStorage.removeItem('authToken');
+
+    // Actualizar el estado de autenticación si es necesario
+    setIsLoggedIn(false);
+
+    // Redirigir a la pantalla de Login
+    navigate('/login');
   };
 
   return (
@@ -73,6 +86,12 @@ const Banner = () => {
           checkedIcon={<NightlightRound style={{ color: "yellow" }} />}
           inputProps={{ 'aria-label': 'toggle theme' }}
         />
+
+        {/* Botón de cerrar sesión */}
+        <IconButton color="inherit" onClick={handleLogout}>
+          <Logout />
+        </IconButton>
+
       </Toolbar>
     </AppBar>
   );
