@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, IconButton, Divider } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useTheme } from '@mui/material/styles';
 
@@ -26,12 +27,17 @@ const SidePanel = () => {
       }}
     >
       {/* Botón de inicio en la parte superior */}
-      <IconButton onClick={() => navigate('/home')} color="inherit" sx={{ mb: 2 }}>
+      <IconButton onClick={() => navigate('/')} color="inherit" sx={{ mb: 2 }}>
         <HomeIcon fontSize="large" />
       </IconButton>
 
-      {/* Divider opcional para mejor separación */}
+      {/* Linea para mejor separación */}
       <Divider sx={{ width: '100%', mb: 2 }} />
+
+      {/* Botón para la lista de alumnos */}
+      <IconButton onClick={() => navigate('/alumnos')} color="inherit" sx={{ mb: 2 }}>
+        <ListAltIcon fontSize="large" />
+      </IconButton>
 
       {/* Icono de ajustes en la parte inferior */}
       <Box sx={{ mt: 'auto' }}>

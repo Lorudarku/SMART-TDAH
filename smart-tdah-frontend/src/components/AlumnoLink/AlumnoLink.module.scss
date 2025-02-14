@@ -1,6 +1,33 @@
-.AlumnoContainer{
+.Alumno{
+    display: flex;
+    align-items: center;
     margin: 10px;
     border: 1px solid #000000;
     border-radius: 10px;
     padding: 10px;
+
+    cursor:pointer;
+}
+
+.AlumnoLink{
+    text-decoration: none;
+    color: black;
+}
+
+.ProfileImage {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2em;
+    margin-right: 5px;
+}
+
+.AlumnoName {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-left: 5px;
 }
