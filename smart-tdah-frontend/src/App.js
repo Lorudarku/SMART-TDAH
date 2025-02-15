@@ -10,7 +10,7 @@ import HomePage from "./pages/HomePage/HomePage";
 import AlumnoData from "./pages/AlumnoData/AlumnoData";
 import SidePanel from "./components/SidePanel/SidePanel";
 import AlumnoList from "./components/AlumnoList/AlumnoList";
-import SidePanelLayout from "./Layouts/SidePanelLayout";
+import SidePanelLayout from "./layouts/SidePanelLayout";
 
 
 // Creamos el contexto para compartir el modo oscuro/claro entre componentes

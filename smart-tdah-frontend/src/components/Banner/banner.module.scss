@@ -1,10 +1,33 @@
-.language {
-    font-size: 15px;
-    margin-left: 4px;
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+
+.logo {
+    margin-right: 10px;
+    width: 45px;
+    height: 45px;
 }
 
-.clickableTitle {
+.title {
+    font-family: 'Righteous';
+    font-size: 50px;
     text-decoration: none;
     color: inherit;
+}
+
+// Container para mover agrupar título y logo
+.logoTitleContainer {
+    display: flex;
+    align-items: center;
     cursor: pointer;
+}
+
+.language {
+    font-size: 15px;
+    margin-left: 2px;
+}
+
+// Container para idiomas, switch y logout
+.rightContainer {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
 }

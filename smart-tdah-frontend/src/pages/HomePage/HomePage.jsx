@@ -1,7 +1,7 @@
 import Login from "../../components/Login/Login";
 import messages from '../../utils/translations.json';
 import { useLanguage } from '../../hooks/LanguageContext';
-import styles from './homePage.module.scss'
+import styles from './HomePage.module.scss'
 import { Navigate } from "react-router-dom";
 
 function HomePage ({isLoggedIn, setIsLoggedIn}){
