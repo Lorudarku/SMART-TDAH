@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './AlumnoLink.module.scss';
-import { Link } from "react-router";
+import { useNavigate } from "react-router-dom";
 
-function AlumnoLink({nombre, onClick}) {
+function AlumnoLink({nombre, onClick, isLoggedIn}) {
     const getInitials = (name) => {
         const [firstName, lastName] = name.split(' ');
         return `${firstName[0]}${lastName ? lastName[0] : ''}`.toUpperCase();
@@ -19,23 +19,23 @@ function AlumnoLink({nombre, onClick}) {
 
     const initials = getInitials(nombre);
     const backgroundColor = getRandomColor();
+    const navigate = useNavigate();
+    
+    const handleClick = () => {
+        console.log(isLoggedIn);
+        navigate(`/alumnos/${nombre}`, { state: { isLoggedIn } });
+    };
 
     return (
-        <div className={styles.AlumnoContainer}>
-            <Link className={styles.AlumnoLink} 
-                to={{
-                    pathname: `/alumnos/${nombre}`,
-                }}
-            >
-                <div className={styles.Alumno}>
-                    <div className={styles.ProfileImage} style={{ backgroundColor }}>
-                        {initials}
-                    </div>
-                    <h1 className={styles.AlumnoName}>{nombre}</h1>
+        <div className={styles.AlumnoContainer} onClick={handleClick}>
+            <div className={styles.Alumno}>
+                <div className={styles.ProfileImage} style={{ backgroundColor }}>
+                    {initials}
                 </div>
-            </Link>
+                <h1 className={styles.AlumnoName}>{nombre}</h1>
+            </div>
         </div>
-    )
+    );
 }
 
 export default AlumnoLink

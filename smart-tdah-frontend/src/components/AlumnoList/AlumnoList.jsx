@@ -1,12 +1,9 @@
 import styles from './AlumnoList.module.scss';
 import AlumnoLink from '../AlumnoLink/AlumnoLink';
 
-const Alumnos = ["juan", "jose", "diego", "pepiño", "pedro", "gerbasio", "pepa", "sabado", "pepe viyuela"];
+const Alumnos = ["juan", "jose", "diego", "pepe", "pedro", "gerbasio", "pepa", "sabado domingo lunes", "roberto carlo"];
 
 function AlumnoList() {
-    const handleAlumnoClick = (nombre) => {
-        console.log(`Alumno ${nombre} clicked`);
-    };
 
     return (
         <div className={styles.AlumnoContainer}>
@@ -15,7 +12,6 @@ function AlumnoList() {
                 {Alumnos.map((alumno) => (
                     <AlumnoLink key={alumno}
                         nombre={alumno}
-                        onClick={handleAlumnoClick}
                     />
                 ))}
             </div>

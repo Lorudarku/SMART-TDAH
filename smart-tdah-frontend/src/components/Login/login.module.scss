@@ -1,7 +1,36 @@
-.singInButton{
-margin:0px;
-padding:0px;
+.mainContainer {
+    max-width: 400px;
+    margin: 0 auto;
 }
-.link{
-    display: inline
+
+.boxContainer {
+    margin-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo {
+    width: 200px; /* Ajusta el tamaño del logo según sea necesario */
+    height: auto;
+    margin-right: 20px; /* Añadir margen derecho para separar el logo del formulario */
+}
+
+.form {
+    margin-top: 1rem;
+    width: 100%; /* Fija el ancho del formulario */
+}
+
+.submitButton {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.loginButton {
+    margin: 0;
+}
+
+.linkSignUp {
+    margin: 0;
+    display: inline;
 }

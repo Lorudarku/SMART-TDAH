@@ -1,12 +1,22 @@
-
 .homePage {
     display: flex;
-
-    .container {
-        padding: "20px";
-    }
-}
-
-.login{
-     padding: "20px"
-}
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 94vh;
+  }
+  
+  .textContainer {
+    font-size: 2vw;
+    text-align: center;
+    margin-right: 20px;
+  }
+  
+  .logoContainer {
+    margin-left: 20px;
+  }
+  
+  .logo {
+    width: 40vw; /* Ajusta el tamaño del logo según sea necesario */
+    height: auto;
+  }

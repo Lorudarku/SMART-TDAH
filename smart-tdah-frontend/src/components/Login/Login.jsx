@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, TextField, Button, Typography, Box, Link } from '@mui/material';
-import {backendUrl} from '../../utils/constants'
-import styles from './login.module.scss'
+import { backendUrl } from '../../utils/constants';
+import styles from './login.module.scss';
+import logo from '../../assets/logo1.png';
 
 const Login = ({ setIsLoggedIn }) => {
   const [email, setEmail] = useState('');
@@ -24,19 +25,15 @@ const Login = ({ setIsLoggedIn }) => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+    <Container component="main" maxWidth="xs" className={styles.mainContainer}>
+      <Box className={styles.boxContainer}>
+        {/* Logo de la aplicación */}
+        <img src={logo} alt="Logo" className={styles.logo} />
+
         <Typography component="h1" variant="h5">
-          <h1>Sign In </h1>
+          <h1>Login</h1>
         </Typography>
-        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleLogin} noValidate className={styles.form}>
           <TextField
             margin="normal"
             required
@@ -65,15 +62,15 @@ const Login = ({ setIsLoggedIn }) => {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            className={styles.submitButton}
           >
-           <p className={styles.singInButton}>Sign In</p>
+            <p className={styles.loginButton}>Login</p>
           </Button>
           {error && <Typography color="error">{error}</Typography>}
           <Typography variant="body2">
             {"Don't have an account? "}
             <Link href="#" onClick={() => navigate('/signup')}>
-              <p className={styles.link}>Sign Up </p>
+              <p className={styles.linkSignUp}>Sign Up </p>
             </Link>
           </Typography>
         </Box>

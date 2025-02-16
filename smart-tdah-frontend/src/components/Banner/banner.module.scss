@@ -1,16 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+.toolbar {
+    display: flex;
+    align-items: center;
+    padding: 0px 5px !important;
+    height: 4vh;
+    background-color: #047acf;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
 
 .logo {
     margin-right: 10px;
-    width: 45px;
-    height: 45px;
 }
 
 .title {
-    font-family: 'Righteous';
-    font-size: 50px;
+    font-family: Impact !important;
+    font-size: 50px !important;
     text-decoration: none;
-    color: inherit;
+    color: white;
 }
 
 // Container para mover agrupar título y logo
@@ -18,11 +23,12 @@
     display: flex;
     align-items: center;
     cursor: pointer;
+    color: white;
 }
 
 .language {
     font-size: 15px;
-    margin-left: 2px;
+    margin-left: 2px;;
 }
 
 // Container para idiomas, switch y logout
@@ -30,4 +36,5 @@
     display: flex;
     align-items: center;
     margin-left: auto;
+    color: white;
 }

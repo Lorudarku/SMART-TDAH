@@ -1,0 +1,31 @@
+.sidePanel {
+  width: 60px;
+  height: 95vh; 
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  background-color: rgb(65, 65, 65);
+}
+
+.button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  width: 40px !important;
+  height: auto !important;
+}
+
+.divider {
+  width: 40px;
+  height: 2px;
+  background-color: white;
+  margin: 20px 0 !important;
+}
+
+.settingsContainer {  
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-top: auto;
+}
