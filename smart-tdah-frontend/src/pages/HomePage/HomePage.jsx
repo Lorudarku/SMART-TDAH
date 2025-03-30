@@ -1,28 +1,28 @@
 import Login from "../../components/Login/Login";
 import messages from '../../utils/translations.json';
 import { useLanguage } from '../../hooks/LanguageContext';
-import styles from './homePage.module.scss'
+import styles from './HomePage.module.scss'
 import { Navigate } from "react-router-dom";
+import logo from '../../assets/logo1.png';
 
 function HomePage ({isLoggedIn, setIsLoggedIn}){
     const {language} = useLanguage();
-
-    // Verificar si el idioma está definido en las traducciones
-    // if (!messages[language]) {
-    //   console.error(`Language "${language}" is not defined in translations.`);
-    //   return null;
-    // }
  
     return (
       isLoggedIn ? (
-          <div className={styles.homePage}>
-            <main className={styles.container}>
+        // Página principal
+        <div className={styles.homePage}>
+          <div className={styles.textContainer}>
               <h1>{messages[language]?.welcome}</h1>
               <p>{messages[language]?.description}</p>
-            </main>
           </div>
+
+          <div className={styles.logoContainer}>
+            <img src={logo} className={styles.logo} alt="Logo" />
+          </div>
+        </div>
         ) : (
-          <main className={styles.login}>
+          <main>
             <Navigate
               to={{
               pathname: "/login",

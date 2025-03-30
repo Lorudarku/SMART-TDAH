@@ -1,21 +1,18 @@
-.logo {
-    width: 200px; /* Ajusta el tamaño del logo según sea necesario */
-    height: auto;
-}
-
 .boxContainer {
     margin-top: calc(5% + 64px); /* Ajusta el margen superior para que quede debajo del Banner */
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 400px; /* Limita el ancho máximo del contenedor */
+    margin-left: auto; /* Centra horizontalmente */
+    margin-right: auto; /* Centra horizontalmente */
 }
 
-.titleLogin {
-    margin-top: 5px;
+.titleSignUp {
     font-weight: bold !important; /* Aplica negrita */
 }
 
 .submitButton { /* Boton para logearse*/
     margin-top: 5px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }

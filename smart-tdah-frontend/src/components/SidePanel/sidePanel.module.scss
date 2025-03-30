@@ -1,0 +1,35 @@
+.sidePanel {
+  flex-direction: column; /* Acomoda los elementos en forma de columna */
+  width: 60px; // Ancho del SidePanel;
+  height: calc(100% - 64px) !important; // Resta el alto del Banner
+  background-color: rgb(65, 65, 65);
+  position: fixed !important; /* Fija el SidePanel */
+  top: 64px !important; /* Ajusta para que quede debajo del Banner */
+  left: 0 !important; /* Posición en el lado izquierdo */
+  z-index: 999 !important; /* Asegura que esté por encima del contenido principal */
+  padding-top: 10px; /* Espacio superior para el contenido */;
+  padding-bottom: 10px; /* Espacio inferior para el contenido */;
+}
+
+.button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  width: 40px !important;
+  height: auto !important;
+}
+
+.divider {
+  width: 40px;
+  height: 2px;
+  background-color: white;
+  margin: 20px 0 !important;
+}
+
+.settingsContainer {  
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-top: auto;
+}

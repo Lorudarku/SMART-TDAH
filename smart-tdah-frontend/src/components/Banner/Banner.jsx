@@ -1,11 +1,11 @@
-// src/components/Banner.js
 import React, { useContext, useState } from 'react'; // Import useState here
-import { AppBar, Toolbar, Typography, Switch, IconButton, Menu, MenuItem } from '@mui/material'; // Include IconButton, Menu, MenuItem
+import { Toolbar, Typography, Switch, IconButton, Menu, MenuItem, Divider } from '@mui/material'; // Include IconButton, Menu, MenuItem
 import { WbSunny, NightlightRound, Language, Logout } from '@mui/icons-material'; // Include Language icon
 import { Link, useNavigate } from 'react-router-dom';
 import { ColorModeContext } from '../../App';
 import { useLanguage } from '../../hooks/LanguageContext';
-import styles from './banner.module.scss'
+import styles from './banner.module.scss';
+import logo from '../../assets/favicon.ico';
 
 
 const Banner = ({ setIsLoggedIn }) => {
@@ -35,26 +35,33 @@ const Banner = ({ setIsLoggedIn }) => {
 
   // Maneja el cierre de sesión
   const handleLogout = () => {
-    // Eliminar el token de autenticación
-    localStorage.removeItem('authToken');
-
-    // Actualizar el estado de autenticación si es necesario
-    setIsLoggedIn(false);
-
-    // Redirigir a la pantalla de Login
-    navigate('/login');
+    localStorage.removeItem('authToken'); // Eliminar el token de autenticación
+    setIsLoggedIn(false); // Actualizar el estado de autenticación
+    navigate('/login'); // Redirigir a la pantalla de Login
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#6f6f6f" }}>
-      <Toolbar>
+    <Toolbar className={styles.toolbar}>
+      {/* Contenedor para el logo y el título */}
+      <div className={styles.logoTitleContainer} onClick={() => navigate('/')}>
+        {/* Logo de la aplicación */}
+        <img src={logo} alt="Logo" className={styles.logo} />
+        
+        {/* Título de la aplicación */}
+        <Typography className={styles.title}>
+          SMART-TDAH
+        </Typography>
+      </div>
 
+      
+      {/* Contenedor para el switch y el botón de logout */}
+      <div className={styles.rightContainer}>
         {/* Botón para cambiar de idioma */}
         <IconButton
           color="inherit"
           onClick={handleLanguageMenuOpen}
           aria-label="select language"
-          sx={{ mr: 2 }}
+          sx={{ mr: 0 }}
         >
           <Language />
           <i className={styles.language}>{language}</i>
@@ -71,29 +78,24 @@ const Banner = ({ setIsLoggedIn }) => {
           <MenuItem onClick={() => handleLanguageChange("pt")}>Português</MenuItem>
         </Menu>
 
-        {/* Título de la aplicación */}
-        <Typography variant="h6" style={{ flexGrow: 1 }}>
-          <Link to="/" className={styles.clickableTitle}>
-            SMART-TDAH
-          </Link>
-        </Typography>
-
         {/* Switch para cambiar entre el tema claro y oscuro */}
         <Switch
+          className={styles.switch}
           checked={isDarkMode}
           onChange={colorMode.toggleColorMode}
           icon={<WbSunny style={{ color: "orange" }} />}
           checkedIcon={<NightlightRound style={{ color: "yellow" }} />}
-          inputProps={{ 'aria-label': 'toggle theme' }}
         />
+
+        {/* Separador */}
+        <Divider className={styles.divider} />
 
         {/* Botón de cerrar sesión */}
         <IconButton color="inherit" onClick={handleLogout}>
           <Logout />
         </IconButton>
-
-      </Toolbar>
-    </AppBar>
+      </div>
+    </Toolbar>
   );
 };
 

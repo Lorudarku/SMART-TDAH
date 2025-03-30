@@ -2,16 +2,16 @@
     display: flex;
     align-items: center;
     margin: 10px;
-    border: 1px solid #000000;
-    border-radius: 10px;
+    border: 1px solid;
+    border-radius: 10px; 
     padding: 10px;
-
+    background-color: #cfcfcf5e;
     cursor:pointer;
 }
 
 .AlumnoLink{
     text-decoration: none;
-    color: black;
+    color: inherit;
 }
 
 .ProfileImage {
@@ -30,4 +30,13 @@
     font-size: 1.2em;
     font-weight: bold;
     margin-left: 5px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.AlumnoCursoEmail {
+    font-size: 0.8em;
+    margin-left: 5px;
+    margin-top: 0;
+    margin-bottom: 0;
 }
