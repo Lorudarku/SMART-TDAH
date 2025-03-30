@@ -2,94 +2,160 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors'); 
 const bcrypt = require('bcrypt');
-const pool = require('./dbConfig');
 const jwt = require('jsonwebtoken');
+const pool = require('./dbConfig');
+
+require('dotenv').config(); // Cargar variables de entorno desde .env 
 
 const app = express();
-const PORT = 3001;
-const JWT_SECRET = 'smart-tdah'; // Clave secreta para firmar los tokens JWT
+const PORT = process.env.SERVER_PORT; // Puerto del servidor
+const JWT_SECRET = process.env.JWT_SECRET; // Clave secreta para firmar los tokens JWT
 
 app.use(cors()); // Usa el middleware cors
 app.use(bodyParser.json());
 
-// Ruta de prueba para verificar la conexión a la base de datos
-app.get('/test-db', async (req, res) => {
-  try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT NOW()');
-    client.release();
-    res.send(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error connecting to the database');
-  }
-});
-
-// Ruta de registro
-app.post('/signup', async (req, res) => {
-  const { username, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  try {
-    const client = await pool.connect();
-    const result = await client.query(
-      'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id',
-      [username, email, hashedPassword]
-    );
-    client.release();
-    res.status(201).json({ userId: result.rows[0].id });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error registering new user');
-  }
-});
-
-// Ruta de login
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
-      res.status(401).send('Invalid credentials');
-      return;
+//Funcion para verificar el token
+const checkToken = (req, res, next) => { //req: request, res: response, next: next middleware
+  try { // Intentar verificar el token
+    const authHeader = req.get('Authorization'); // Obtener el encabezado de autorización
+    if (!authHeader) { // Si no se proporcionó un token
+      return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado
     }
 
-    const user = result.rows[0];
-    if (await bcrypt.compare(password, user.password)) {
-      // Generar un token JWT
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' }); // El token expira en 1 hora
-      res.status(200).json({ token });
-    } else {
-      res.status(401).send('Invalid credentials');
-    }
-    client.release();
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error logging in');
-  }
-});
-
-  //Funcion checkToken
-  const checkToken = (req, res, next) => {
-    const authHeader = req.get('Authorization');
-    if (!authHeader) {
-      res.status(401).send('Unauthorized');
-      return;
-    }
-
-  const token = authHeader.split(' ')[1];
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    req.userId = payload.userId;
-    next();
-  } catch (err) {
-    res.status(403).send('Forbidden');
+    const token = authHeader.split(' ')[1]; // Obtener el token de la cabecera de autorización
+    const payload = jwt.verify(token, JWT_SECRET); // Verificar el token con la clave secreta
+    req.userId = payload.userId; // Agregar el id del usuario al objeto de solicitud
+    next(); // Llamar al siguiente middleware
+  } catch (err) { // Manejar errores
+    return res.status(403).send('Invalid or expired token'); // Enviar un mensaje de error de token inválido o caducado
   }
 };
 
+// ############################################################################################################################
+// GET
+// ############################################################################################################################
+
+// Ruta de prueba para verificar la conexión a la base de datos
+app.get('/test-db', async (req, res) => { 
+  try { // Intentar conectarse a la base de datos
+    const client = await pool.connect(); // Obtener un cliente de la piscina
+    const result = await client.query('SELECT NOW()'); // Ejecutar una consulta de prueba
+    client.release(); // Liberar el cliente
+    return res.send(result.rows); // Enviar la respuesta
+  } catch (err) { // Manejar errores
+    console.error(err);
+    return res.status(500).send('Error connecting to the database');
+  }
+});
+
+// Devuelve la lista de alumnos asociados a un profesor logeado
+app.get('/alumnos/', checkToken, async (req, res) => { //req: request, res: response
+  const idProfesor = req.userId; // Obtener el id del profesor del token JWT
+
+  if (!idProfesor) { // Si no se proporcionó un id de profesor
+    return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado
+  }
+
+  try { // Intentar obtener la lista de alumnos asociados al profesor
+    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
+
+    const result = await client.query( // Ejecutar una consulta para obtener la lista de alumnos asociados al profesor
+      'SELECT alumnos.*  FROM alumnos JOIN profesor_alumno ON alumnos.id_alumno = profesor_alumno.id_alumno WHERE profesor_alumno.id_profesor = $1',
+      [idProfesor]
+    );
+    client.release(); // Liberar el cliente
+    if (result.rows.length === 0) { // Si no se encontraron alumnos asociados al profesor
+      return res.status(404).send('No se encontraron alumnos'); // Enviar un mensaje de error de no se encontraron alumnos
+    } 
+    return res.status(200).json(result.rows); // Enviar la lista de alumnos en la respuesta
+  } catch (err) { // Manejar errores
+    console.error(err);
+    res.status(500).send('Error fetching alumnos');
+  }
+});
+
+// Devuelve las estadísticas de un alumno
+app.get('/alumnos/:id_alumno', checkToken, async (req, res) => { //req: request, res: response
+  const idAlumno = req.params.id_alumno; // Obtener el id del alumno de los parámetros de la solicitud
+  const idProfesor = req.userId; // Obtener el id del profesor del token JWT
+
+  if (!idProfesor) { // Si no se proporcionó un id de profesor
+    return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado 
+  }
+
+  try { // Intentar obtener las estadísticas del alumno
+    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
+    const result = await client.query( // Ejecutar una consulta para obtener las estadísticas del alumno
+      'SELECT alumnos.*, ejercicios.* FROM alumnos LEFT JOIN ejercicios ON alumnos.id_alumno = ejercicios.id_alumno WHERE alumnos.id_alumno = $1',
+      [idAlumno]
+    );
+    client.release(); // Liberar el cliente
+    if (result.rows.length === 0) { // Si no se encontraron estadísticas del alumno
+      return res.status(404).send('No se encontraron estadísticas'); // Enviar un mensaje de error de no se encontraron estadísticas
+    }
+    return res.status(200).json(result.rows); // Enviar las estadísticas del alumno en la respuesta
+  } catch (err) { // Manejar errores
+    console.error(err);
+    return res.status(500).send('Error fetching stats');
+  }
+});
+
+// ############################################################################################################################
+// POST
+// ############################################################################################################################
+
+// Ruta de registro de un nuevo usuario (profesor)
+app.post('/signup', async (req, res) => { //req: request, res: response
+  const { email, nombre, apellidos, password } = req.body; // Obtener las credenciales del cuerpo de la solicitud
+  const hashedPassword = await bcrypt.hash(password, 10); // Generar un hash de la contraseña
+
+  try { // Intentar registrar al nuevo profesor en la base de datos
+    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
+    const result = await client.query( // Ejecutar una consulta para insertar al nuevo profesor en la base de datos
+      // [IMPLEMENTAR] asignar un id al profesor
+      'INSERT INTO profesores (email, nombre, apellidos, password) VALUES ($1, $2, $3, $4) RETURNING id_profesor',
+      [email, nombre, apellidos, hashedPassword]
+    );
+    client.release();
+    return res.status(201).json({ userId: result.rows[0].id }); // Enviar el id del nuevo profesor en la respuesta
+  } catch (err) { // Manejar errores
+    console.error(err);
+    return res.status(500).send('Error registering new user'); // Enviar un mensaje de error de registro de nuevo usuario
+  }
+});
+
+// Ruta de login de un usuario (profesor)
+app.post('/login', async (req, res) => { //req: request, res: response
+  const { email, password } = req.body; // Obtener las credenciales del cuerpo de la solicitud
+
+  try { // Intentar buscar al usuario en la base de datos
+    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
+    const result = await client.query('SELECT * FROM profesores WHERE email = $1', [email]); // Buscar al usuario por su correo electrónico
+    if (result.rows.length === 0) { // Si no se encontró al usuario
+      client.release();
+      return res.status(401).send('Invalid credentials'); // Enviar un mensaje de error de credenciales inválidas
+    }
+
+    const profesor = result.rows[0]; // Obtener al usuario de la base de datos
+    // Comparar la contraseña proporcionada con la contraseña almacenada en la base de datos
+    if (await bcrypt.compare(password, profesor.password)) {
+      // Generar un token JWT para el usuario
+      const token = jwt.sign({ userId: profesor.id_profesor }, JWT_SECRET, { expiresIn: '1h' }); // El token expira en 1 hora
+      client.release();
+      return res.status(200).json({ token }); // Enviar el token al cliente en la respuesta
+    } else { // Si las contraseñas no coinciden
+      client.release();
+      return res.status(401).send('Invalid credentials'); // Enviar un mensaje de error de credenciales inválidas
+    }
+  } catch (err) { // Manejar errores
+    console.error(err);
+    return res.status(500).send('Error logging in'); // Enviar un mensaje de error de inicio de sesión
+  }
+});
+
+// ############################################################################################################################
+
 // Iniciar el servidor
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, () => { // Iniciar el servidor en el puerto PORT
+  console.log(`Server running on port ${PORT}`); // Imprimir un mensaje en la consola
 });

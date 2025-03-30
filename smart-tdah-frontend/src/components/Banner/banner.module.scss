@@ -1,10 +1,13 @@
 .toolbar {
-    display: flex;
-    align-items: center;
-    padding: 0px 5px !important;
-    height: 4vh;
-    background-color: #047acf;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    padding: 0px 8px !important; /* Añade espacio interno respecto */
+    background-color: #047acf; /* Color de fondo */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Sombra de la parte inferior*/
+    position: fixed !important; /* Fija el Banner */
+    top: 0 !important; /* Posición en la parte superior */
+    height: 64px !important; /* Altura del Banner */
+    width: 100% !important; /* Ocupa todo el ancho */
+    min-width: 520px !important; /* Ancho mínimo */
+    z-index: 1000 !important; /* Asegura que esté por encima de otros elementos */
 }
 
 .logo {
@@ -30,6 +33,13 @@
     font-size: 15px;
     margin-left: 2px;;
 }
+
+.divider {
+    width: 2px;
+    height: 40px;
+    background-color: white;
+    margin: 0px 10px !important;
+  }
 
 // Container para idiomas, switch y logout
 .rightContainer {

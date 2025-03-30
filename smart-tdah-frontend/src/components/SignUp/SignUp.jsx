@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 import axios from 'axios';
-import {backendUrl} from '../../utils/constants'
+import { backendUrl } from '../../utils/constants';
+import styles from './signUp.module.scss'; // Importa los estilos
 
 const SignUp = () => {
-  const [username, setUsername] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [apellidos, setApellidos] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,9 +16,8 @@ const SignUp = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${backendUrl}/signup`, { username, email, password });
+      const response = await axios.post(`${backendUrl}/signup`, { email, nombre, apellidos, password });
       console.log('User registered:', response.data);
-      // Redirigir al usuario a la página de inicio de sesión
       navigate('/login');
     } catch (err) {
       setError('Error registering new user');
@@ -24,30 +25,34 @@ const SignUp = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          <h1>Sign Up</h1>
+    <Container>
+      <Box className={styles.boxContainer}>
+        <Typography component="h1" variant="h5" className={styles.titleSignUp}>
+          Sign Up
         </Typography>
-        <Box component="form" onSubmit={handleSignUp} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSignUp} noValidate className={styles.form}>
           <TextField
             margin="normal"
             required
             fullWidth
-            id="username"
-            label="Username"
-            name="username"
-            autoComplete="username"
+            id="Nombre"
+            label="Nombre"
+            name="Nombre"
+            autoComplete="Nombre"
             autoFocus
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="Apellidos"
+            label="Apellidos"
+            name="Apellidos"
+            autoComplete="Apellidos"
+            value={apellidos}
+            onChange={(e) => setApellidos(e.target.value)}
           />
           <TextField
             margin="normal"
@@ -76,7 +81,7 @@ const SignUp = () => {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            className={styles.submitButton}
           >
             Sign Up
           </Button>

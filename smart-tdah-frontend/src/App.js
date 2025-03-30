@@ -8,7 +8,6 @@ import Login from "./components/Login/Login";
 import SignUp from "./components/SignUp/SignUp";
 import HomePage from "./pages/HomePage/HomePage";
 import AlumnoData from "./pages/AlumnoData/AlumnoData";
-import SidePanel from "./components/SidePanel/SidePanel";
 import AlumnoList from "./components/AlumnoList/AlumnoList";
 import SidePanelLayout from "./layouts/SidePanelLayout";
 
@@ -20,22 +19,20 @@ function App() {
   const [mode, setMode] = useState("light");
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado de autenticación
 
-  // Función para alternar el tema
-  const colorMode = useMemo(
-    () => ({
-      toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+  const colorMode = useMemo( // Función para alternar el tema
+    () => ({ // Devuelve un objeto con la función para cambiar el tema y el modo actual
+      toggleColorMode: () => { // Función para cambiar el tema
+        setMode((prevMode) => (prevMode === "light" ? "dark" : "light")); // Cambiar el modo
       },
       mode, // Pasamos el modo actual ("light" o "dark")
     }),
     [mode]
   );
 
-  // Crear el tema de MUI según el estado del modo oscuro
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
+  const theme = useMemo( // Crear el tema de MUI según el estado del modo oscuro
+    () => // Devuelve el tema de MUI
+      createTheme({ // Crear el tema de MUI
+        palette: { // Personalizar la paleta de colores
           mode: mode,
           background: {
             default: mode === "dark" ? "#121212" : "#f5f5f5", // Fondo oscuro o claro
@@ -61,7 +58,7 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/" element={<SidePanelLayout render= {<HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}/>} />
               <Route path="/alumnos" element={<SidePanelLayout render= {<AlumnoList />}/>} />
-              <Route path="/alumnos/:alumno" element={<SidePanelLayout render= {<AlumnoData/>}/>} />
+              <Route path="/alumnos/:id_alumno" element={<SidePanelLayout render= {<AlumnoData isLoggedIn={isLoggedIn} />}/>}/>
             </Routes>
           </Router>
         </ThemeProvider>

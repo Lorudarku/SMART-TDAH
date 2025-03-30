@@ -25,15 +25,15 @@ const Login = ({ setIsLoggedIn }) => {
   };
 
   return (
-    <Container component="main" maxWidth="xs" className={styles.mainContainer}>
+    <Container>
       <Box className={styles.boxContainer}>
         {/* Logo de la aplicación */}
         <img src={logo} alt="Logo" className={styles.logo} />
 
-        <Typography component="h1" variant="h5">
-          <h1>Login</h1>
+        <Typography component="h1" variant="h5" className={styles.titleLogin}>
+            Login
         </Typography>
-        <Box component="form" onSubmit={handleLogin} noValidate className={styles.form}>
+        <Box component="form" onSubmit={handleLogin} noValidate>
           <TextField
             margin="normal"
             required
@@ -64,13 +64,13 @@ const Login = ({ setIsLoggedIn }) => {
             variant="contained"
             className={styles.submitButton}
           >
-            <p className={styles.loginButton}>Login</p>
+            Login
           </Button>
           {error && <Typography color="error">{error}</Typography>}
           <Typography variant="body2">
             {"Don't have an account? "}
             <Link href="#" onClick={() => navigate('/signup')}>
-              <p className={styles.linkSignUp}>Sign Up </p>
+              Sign Up
             </Link>
           </Typography>
         </Box>

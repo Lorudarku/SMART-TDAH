@@ -1,13 +1,32 @@
 .AlumnoContainer {
     flex-direction: column; 
     align-items: center;
+    max-width: 1200px; /* Limita el ancho máximo del contenedor */
+    margin: 0 auto; /* Centra horizontalmente */
 }
 
 .AlumnoList {
-    margin: 20px;
+    margin: 2px;
+    padding: 20px; /* Añade espacio interno */
 }
 
 .title{
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   text-align: center;
+}
+
+.filtersContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px; /* Espaciado entre los filtros */
+  padding: 20px; /* Añade espacio interno */
+}
+
+.filterFormControl {
+  min-width: 150px; /* Ancho mínimo del desplegable */
+}
+
+.filterQueryInput {
+  flex: 1; /* Ocupa el espacio restante */
 }

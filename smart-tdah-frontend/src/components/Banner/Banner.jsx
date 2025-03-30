@@ -88,7 +88,7 @@ const Banner = ({ setIsLoggedIn }) => {
         />
 
         {/* Separador */}
-        <Divider orientation="vertical" flexItem sx={{ mr: 3 }} />
+        <Divider className={styles.divider} />
 
         {/* Botón de cerrar sesión */}
         <IconButton color="inherit" onClick={handleLogout}>

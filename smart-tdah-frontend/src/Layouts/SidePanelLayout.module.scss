@@ -1,8 +1,19 @@
 .flex {
     display: flex;
-    width: 99vw;
-
-}
-.container {
-    width: 100%;
-}
+    width: 100vw;
+    height: 100vh; /* Ocupa toda la altura de la pantalla */
+    overflow: hidden; /* Evita que el contenido desborde */
+  }
+  
+  .sidePanel {
+    width: 60px; /* Ancho del SidePanel */
+    height: 100%; /* Ocupa toda la altura del contenedor */
+    min-height: 400px !important; /* Altura mínima */
+  }
+  
+  .container {
+    flex: 1; /* Ocupa el espacio restante en el ancho */
+    height: calc(100% - 64px); /* Resta el alto del Banner */
+    margin-top: 64px; /* Deja espacio para el Banner */
+    overflow-y: auto; /* Permite el scroll vertical si el contenido es más alto */
+  }

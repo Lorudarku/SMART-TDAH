@@ -1,1 +1,1 @@
- export const backendUrl = 'http://localhost:3001'
+ export const backendUrl = 'http://localhost:3001'; // URL del servidor de backend
