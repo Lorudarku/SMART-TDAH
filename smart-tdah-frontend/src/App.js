@@ -10,6 +10,7 @@ import HomePage from "./pages/HomePage/HomePage";
 import AlumnoData from "./pages/AlumnoData/AlumnoData";
 import AlumnoList from "./components/AlumnoList/AlumnoList";
 import SidePanelLayout from "./layouts/SidePanelLayout";
+import Settings from "./pages/Settings/Settings";
 
 
 // Creamos el contexto para compartir el modo oscuro/claro entre componentes
@@ -59,6 +60,7 @@ function App() {
               <Route path="/" element={<SidePanelLayout render= {<HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}/>} />
               <Route path="/alumnos" element={<SidePanelLayout render= {<AlumnoList />}/>} />
               <Route path="/alumnos/:id_alumno" element={<SidePanelLayout render= {<AlumnoData isLoggedIn={isLoggedIn} />}/>}/>
+              <Route path="/settings" element={<SidePanelLayout render={<Settings />} />} />
             </Routes>
           </Router>
         </ThemeProvider>

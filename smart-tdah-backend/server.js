@@ -100,6 +100,30 @@ app.get('/alumnos/:id_alumno', checkToken, async (req, res) => { //req: request,
   }
 });
 
+//Devuelve datos del profesor logeado
+app.get('/profile', checkToken, async (req, res) => { //req: request, res: response
+  const idProfesor = req.userId; // Obtener el id del profesor del token JWT
+
+  if (!idProfesor) { // Si no se proporcionó un id de profesor
+    return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado
+  }
+
+  try { // Intentar obtener los datos del perfil del profesor
+    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
+    const result = await client.query('SELECT nombre, apellidos, email FROM profesores WHERE id_profesor = $1', [idProfesor]); // Ejecutar una consulta para obtener los datos del perfil del profesor
+    client.release(); // Liberar el cliente
+
+    if (result.rows.length === 0) { // Si no se encontraron datos del perfil del profesor
+      return res.status(404).send('Profile not found'); // Enviar un mensaje de error de perfil no encontrado
+    }
+
+    res.status(200).json(result.rows[0]); // Enviar los datos del perfil del profesor en la respuesta
+  } catch (err) { // Manejar errores
+    console.error(err);
+    res.status(500).send('Error fetching profile');
+  }
+});
+
 // ############################################################################################################################
 // POST
 // ############################################################################################################################

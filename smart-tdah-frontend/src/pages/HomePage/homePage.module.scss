@@ -1,10 +1,12 @@
 .homePage {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    height: 94vh;
-  }
+    display: flex; // Flexbox para centrar el contenido
+    flex-direction: row; // Cambia a columna en pantallas pequeñas
+    align-items: center; // Alinea verticalmente al centro
+    justify-content: center; // Alinea horizontalmente al centro
+    height: 94vh; // Altura del viewport menos la barra de navegación
+    margin-left : 10vw; // Margen izquierdo para centrar el contenido
+    margin-right : 10vw; // Margen derecho para centrar el contenido
+   }
   
   .textContainer {
     font-size: 2vw;
