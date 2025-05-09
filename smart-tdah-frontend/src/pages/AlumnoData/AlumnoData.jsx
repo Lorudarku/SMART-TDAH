@@ -17,6 +17,13 @@ function AlumnoData({ isLoggedIn }) {
   const { language } = useLanguage(); // Obtiene el idioma actual
 
   useEffect(() => {
+    if (!id_alumno || isNaN(id_alumno)) {
+      console.error("Invalid id_alumno:", id_alumno); // Log para depuración
+      setError('Invalid student ID'); // Valida que id_alumno no sea undefined o no numérico
+      setLoading(false);
+      return;
+    }
+
     const fetchAlumnoData = async () => {
       const token = localStorage.getItem('token'); // Obtener el token JWT del localStorage.
       if (!token) {
@@ -86,7 +93,7 @@ function AlumnoData({ isLoggedIn }) {
       {/* Contenedor para la información del alumno */}
       <div className={styles.alumnoInfoContainer}>
         <h1 className={styles.alumnoName}>
-          {filteredStats[0].nombre} {filteredStats[0].apellidos}
+          {filteredStats[0]?.nombre} {filteredStats[0]?.apellidos}
         </h1>
         <p
           className={styles.alumnoDetails}
@@ -94,7 +101,7 @@ function AlumnoData({ isLoggedIn }) {
             color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
           }}
         >
-          <strong>{messages[language]?.email}:</strong> {filteredStats[0].email}
+          <strong>{messages[language]?.email}:</strong> {filteredStats[0]?.email}
         </p>
         <p
           className={styles.alumnoDetails}
@@ -102,7 +109,7 @@ function AlumnoData({ isLoggedIn }) {
             color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
           }}
         >
-          <strong>{messages[language]?.course}:</strong> {filteredStats[0].curso}
+          <strong>{messages[language]?.course}:</strong> {filteredStats[0]?.curso}
         </p>
         <p
           className={styles.alumnoDetails}
@@ -110,7 +117,7 @@ function AlumnoData({ isLoggedIn }) {
             color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
           }}
         >
-          <strong>{messages[language]?.gender}:</strong> {filteredStats[0].genero || '-'}
+          <strong>{messages[language]?.gender}:</strong> {filteredStats[0]?.genero || '-'}
         </p>
       </div>
 

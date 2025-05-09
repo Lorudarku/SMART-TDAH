@@ -5,52 +5,120 @@ import AlumnoLink from '../AlumnoLink/AlumnoLink';
 import { backendUrl } from '../../utils/constants';
 import { useLanguage } from '../../hooks/LanguageContext';
 import messages from '../../utils/translations.json';
-import { Box, FormControl, InputLabel, MenuItem, Select, TextField, Paper, Typography } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, TextField, Paper, Typography, Button } from '@mui/material';
+import useDebounce from '../../hooks/useDebounce';
+
+// Componente reutilizable para el paginador
+const Paginator = ({ currentPage, totalPages, onPrevious, onNext }) => (
+  <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
+    <Button
+      variant="contained"
+      onClick={onPrevious}
+      disabled={currentPage <= 1} // Deshabilitar si estamos en la primera página
+      sx={{ marginRight: 2 }}
+    >
+      Anterior
+    </Button>
+    <Typography variant="body1">
+      Página {currentPage} de {totalPages}
+    </Typography>
+    <Button
+      variant="contained"
+      onClick={onNext}
+      disabled={currentPage >= totalPages} // Deshabilitar si estamos en la última página
+      sx={{ marginLeft: 2 }}
+    >
+      Siguiente
+    </Button>
+  </Box>
+);
 
 function AlumnoList() {
   const [alumnos, setAlumnos] = useState([]);
-  const [filteredAlumnos, setFilteredAlumnos] = useState([]);
+  const [alumnoColors, setAlumnoColors] = useState({}); // Estado para almacenar los colores de los alumnos
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { language } = useLanguage();
 
   const [filterBy, setFilterBy] = useState('nombre');
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 500);
+  const [pageSize, setPageSize] = useState(16);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const fetchAlumnos = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError(messages[language]?.noTokenProvided);
-        setLoading(false);
-        return;
-      }
-      try {
-        const response = await axios.get(`${backendUrl}/alumnos/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setAlumnos(response.data);
-        setFilteredAlumnos(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError(messages[language]?.fetchError);
-        setLoading(false);
-      }
-    };
-    if (loading) {
-      fetchAlumnos();
+  const generateRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
     }
-  }, [loading, language]);
+    return color;
+  };
+
+  const fetchAlumnos = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError(messages[language]?.noTokenProvided);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${backendUrl}/alumnos/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          page: currentPage,
+          page_size: pageSize,
+          filter_by: debouncedQuery ? filterBy : null,
+          query: debouncedQuery || null,
+        },
+      });
+
+      const fetchedAlumnos = response.data.alumnos.map((alumno) => ({
+        idAlumno: alumno.id_alumno, // Asegúrate de que idAlumno esté presente
+        nombre: alumno.nombre,
+        apellidos: alumno.apellidos,
+        email: alumno.email,
+        curso: alumno.curso,
+      }));
+
+      // Generar colores solo para los alumnos que no tienen color asignado
+      const newColors = { ...alumnoColors };
+      fetchedAlumnos.forEach((alumno) => {
+        if (!newColors[alumno.idAlumno]) {
+          newColors[alumno.idAlumno] = generateRandomColor();
+        }
+      });
+
+      setAlumnoColors(newColors); // Actualizar los colores en el estado
+      setAlumnos(fetchedAlumnos);
+      setTotalPages(response.data.totalPages);
+      setLoading(false);
+    } catch (err) {
+      setError(messages[language]?.fetchError);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const filtered = alumnos.filter((alumno) => {
-      const value = alumno[filterBy]?.toLowerCase() || '';
-      return value.includes(query.toLowerCase());
-    });
-    setFilteredAlumnos(filtered);
-  }, [query, filterBy, alumnos]);
+    fetchAlumnos();
+  }, [currentPage, pageSize, debouncedQuery, filterBy]);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Manejar cambio a la página siguiente
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   if (loading) {
     return <div>{messages[language]?.loading}</div>;
@@ -67,7 +135,6 @@ function AlumnoList() {
         {messages[language]?.studentList}
       </Typography>
 
-      {/* Contenedor del Paper */}
       <Paper
         elevation={5}
         sx={{
@@ -98,24 +165,50 @@ function AlumnoList() {
             className={styles.filterQueryInput}
             placeholder={messages[language]?.search}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)} // Actualiza el estado query
           />
+
+          {/* Selector de tamaño de página */}
+          <FormControl size="small" className={styles.pageSizeSelector}>
+            <InputLabel>{messages[language]?.pageSize || 'Tamaño página'}</InputLabel>
+            <Select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value)); // Actualizar el tamaño de página
+                setCurrentPage(1); // Reiniciar la página actual al cambiar el tamaño de página
+              }}
+              label={messages[language]?.pageSize || 'Tamaño página'}
+            >
+              <MenuItem value={8}>8</MenuItem>
+              <MenuItem value={16}>16</MenuItem>
+              <MenuItem value={32}>32</MenuItem>
+              <MenuItem value={64}>64</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
+
+        {/* Paginador al inicio */}
+        <Paginator
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+        />
 
         {/* Lista de alumnos */}
         <Box className={styles.AlumnoList}>
-          {filteredAlumnos.map((alumno) => {
-            const alumnoData = {
-              idAlumno: alumno.id_alumno,
-              email: alumno.email,
-              nombre: alumno.nombre,
-              apellidos: alumno.apellidos,
-              genero: alumno.genero,
-              curso: alumno.curso,
-            };
-            return <AlumnoLink key={alumno.id_alumno} alumnoData={alumnoData} isLoggedIn={true} />;
-          })}
+          {alumnos.map((alumno) => (
+            <AlumnoLink key={alumno.idAlumno} alumnoData={alumno} backgroundColor={alumnoColors[alumno.idAlumno]} isLoggedIn={true} />
+          ))}
         </Box>
+
+        {/* Paginador al final */}
+        <Paginator
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+        />
       </Paper>
     </Box>
   );

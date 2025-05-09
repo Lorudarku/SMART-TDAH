@@ -30,3 +30,7 @@
 .filterQueryInput {
   flex: 1; /* Ocupa el espacio restante */
 }
+
+.pageSizeSelector {
+  min-width: 110px !important; /* Aumenta el ancho mínimo para que el texto se vea completo */
+}

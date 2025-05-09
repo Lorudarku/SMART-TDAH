@@ -6,6 +6,7 @@ import { Box, Typography, Avatar, Paper } from '@mui/material';
 const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState(null);
+  const [backgroundColor, setBackgroundColor] = useState(null); // Estado para almacenar el color de fondo
 
   // Genera las iniciales del nombre y apellidos
   const getInitials = (nombre, apellidos) => {
@@ -15,7 +16,7 @@ const Profile = () => {
   };
 
   // Genera un color aleatorio para la foto de perfil
-  const getRandomColor = () => {
+  const generateRandomColor = () => {
     const letters = '0123456789ABCDEF';
     let color = '#';
     for (let i = 0; i < 6; i++) {
@@ -39,13 +40,18 @@ const Profile = () => {
           },
         });
         setProfileData(response.data);
+
+        // Generar y establecer el color de fondo solo la primera vez que se cargan los datos
+        if (!backgroundColor) {
+          setBackgroundColor(generateRandomColor());
+        }
       } catch (err) {
         setError('Error fetching profile data');
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [backgroundColor]); // Dependencia para asegurarse de que el color no se recalcula
 
   if (error) {
     return <Typography color="error">{error}</Typography>;
@@ -56,7 +62,6 @@ const Profile = () => {
   }
 
   const initials = getInitials(profileData.nombre, profileData.apellidos);
-  const backgroundColor = getRandomColor();
 
   return (
     <Box display="flex" justifyContent="center" mt={4}>
@@ -74,7 +79,7 @@ const Profile = () => {
         {/* Foto de perfil */}
         <Avatar
           sx={{
-            bgcolor: backgroundColor,
+            bgcolor: backgroundColor, // Usa el color almacenado en el estado
             width: 150,
             height: 150,
             fontSize: '4rem',

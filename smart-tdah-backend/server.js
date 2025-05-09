@@ -48,39 +48,82 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-// Devuelve la lista de alumnos asociados a un profesor logeado
-app.get('/alumnos/', checkToken, async (req, res) => { //req: request, res: response
-  const idProfesor = req.userId; // Obtener el id del profesor del token JWT
+// Devuelve la lista de alumnos asociados a un profesor logeado con filtros opcionales
+app.get('/alumnos/', checkToken, async (req, res) => {
+  const idProfesor = req.userId;
+  const page = parseInt(req.query.page) || 1; // Página actual
+  const pageSize = parseInt(req.query.page_size) || 16; // Tamaño de página
+  const filterBy = req.query.filter_by || null; // Campo a filtrar (nombre, apellidos, curso)
+  const query = req.query.query || ''; // Valor del filtro
+  const offset = (page - 1) * pageSize; // Calcular el desplazamiento
 
-  if (!idProfesor) { // Si no se proporcionó un id de profesor
-    return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado
+  if (!idProfesor) {
+    return res.status(401).send('Unauthorized');
   }
 
-  try { // Intentar obtener la lista de alumnos asociados al profesor
-    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
+  try {
+    const client = await pool.connect();
 
-    const result = await client.query( // Ejecutar una consulta para obtener la lista de alumnos asociados al profesor
-      'SELECT alumnos.*  FROM alumnos JOIN profesor_alumno ON alumnos.id_alumno = profesor_alumno.id_alumno WHERE profesor_alumno.id_profesor = $1',
-      [idProfesor]
+    let filterCondition = '';
+    const filterParams = [idProfesor];
+
+    // Construir la condición de filtro si se proporciona un filtro
+    if (filterBy && query) {
+      if (!['nombre', 'apellidos', 'curso'].includes(filterBy)) {
+        client.release();
+        return res.status(400).send('Invalid filter field'); // Validar que el campo de filtro sea válido
+      }
+      filterCondition = `AND LOWER(alumnos.${filterBy}) LIKE $2`;
+      filterParams.push(`%${query.toLowerCase()}%`);
+    }
+
+    // Consulta para obtener los alumnos con paginación y filtro
+    const result = await client.query(
+      `SELECT alumnos.* 
+       FROM alumnos 
+       JOIN profesor_alumno ON alumnos.id_alumno = profesor_alumno.id_alumno 
+       WHERE profesor_alumno.id_profesor = $1
+       ${filterCondition}
+       LIMIT $${filterParams.length + 1} OFFSET $${filterParams.length + 2}`,
+      [...filterParams, pageSize, offset]
     );
-    client.release(); // Liberar el cliente
-    if (result.rows.length === 0) { // Si no se encontraron alumnos asociados al profesor
-      return res.status(404).send('No se encontraron alumnos'); // Enviar un mensaje de error de no se encontraron alumnos
-    } 
-    return res.status(200).json(result.rows); // Enviar la lista de alumnos en la respuesta
-  } catch (err) { // Manejar errores
-    console.error(err);
+
+    // Consulta para obtener el número total de alumnos (con o sin filtro)
+    const totalResult = await client.query(
+      `SELECT COUNT(*) AS total 
+       FROM alumnos 
+       JOIN profesor_alumno ON alumnos.id_alumno = profesor_alumno.id_alumno 
+       WHERE profesor_alumno.id_profesor = $1
+       ${filterCondition}`,
+      filterParams
+    );
+
+    client.release();
+
+    const totalAlumnos = parseInt(totalResult.rows[0].total);
+    const totalPages = Math.ceil(totalAlumnos / pageSize);
+
+    return res.status(200).json({
+      alumnos: result.rows,
+      totalPages,
+    });
+  } catch (err) {
+    console.error('Error fetching alumnos:', err.message);
     res.status(500).send('Error fetching alumnos');
   }
 });
 
 // Devuelve las estadísticas de un alumno
 app.get('/alumnos/:id_alumno', checkToken, async (req, res) => { //req: request, res: response
-  const idAlumno = req.params.id_alumno; // Obtener el id del alumno de los parámetros de la solicitud
+  const idAlumno = parseInt(req.params.id_alumno, 10); // Asegúrate de que idAlumno sea un número entero
   const idProfesor = req.userId; // Obtener el id del profesor del token JWT
 
   if (!idProfesor) { // Si no se proporcionó un id de profesor
     return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado 
+  }
+
+  if (isNaN(idAlumno)) {
+    return res.status(400).send('Invalid student ID'); // Valida que idAlumno sea un número válido
   }
 
   try { // Intentar obtener las estadísticas del alumno
