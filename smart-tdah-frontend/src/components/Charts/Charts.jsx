@@ -5,9 +5,12 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
 import Chart from "./Chart";
 import TableStats from "../Table/TableStats";
-import styles from "./Charts.module.scss"; 
+import styles from "./Charts.module.scss";
+import messages from "../../utils/translations.json";
+import { useLanguage } from "../../hooks/LanguageContext";
 
 const Charts = ({ filteredStats, getJuego, getDificultad }) => {
+  const { language } = useLanguage(); // Obtiene el idioma actual
   const printRef = useRef();
   const [filters, setFilters] = useState({
     minDate: null,
@@ -55,38 +58,38 @@ const Charts = ({ filteredStats, getJuego, getDificultad }) => {
           <Box className={styles.filtersContainer}>
             {/* Filtro por dificultad */}
             <FormControl size="small">
-              <InputLabel size="small">Dificultad</InputLabel>
+              <InputLabel size="small">{messages[language]?.difficulty}</InputLabel>
               <Select
                 className={styles.filterFormControl}
                 size="small"
                 value={filters.dificultad}
-                label="Dificultad"
+                label={messages[language]?.difficulty}
                 onChange={(e) => setFilters({ ...filters, dificultad: e.target.value })}
               >
-                <MenuItem value={"None"}>Todos</MenuItem>
-                <MenuItem value={"Fácil"}>Fácil</MenuItem>
-                <MenuItem value={"Normal"}>Normal</MenuItem>
-                <MenuItem value={"Difícil"}>Difícil</MenuItem>
+                <MenuItem value={"None"}>{messages[language]?.all}</MenuItem>
+                <MenuItem value={"Fácil"}>{messages[language]?.easy}</MenuItem>
+                <MenuItem value={"Normal"}>{messages[language]?.normal}</MenuItem>
+                <MenuItem value={"Difícil"}>{messages[language]?.hard}</MenuItem>
               </Select>
             </FormControl>
 
             {/* Filtro por juego */}
             <FormControl size="small">
-              <InputLabel size="small">Juego</InputLabel>
+              <InputLabel size="small">{messages[language]?.game}</InputLabel>
               <Select
                 className={styles.filterFormControl}
                 size="small"
                 value={filters.juego}
-                label="Juego"
+                label={messages[language]?.game}
                 onChange={(e) => setFilters({ ...filters, juego: e.target.value })}
               >
-                <MenuItem value={"None"}>Todos</MenuItem>
-                <MenuItem value={"ejercicioLetras"}>Ejercicio de Letras</MenuItem>
-                <MenuItem value={"ejercicioDesplazamiento"}>Ejercicio de Desplazamiento</MenuItem>
-                <MenuItem value={"operacionesMatematicas"}>Operaciones Matemáticas</MenuItem>
-                <MenuItem value={"memoriseNumber"}>Memorizar Números</MenuItem>
-                <MenuItem value={"matchFigures"}>Emparejar Figuras</MenuItem>
-                <MenuItem value={"ejercicioNumerosIguales"}>Ejercicio de Números Iguales</MenuItem>
+                <MenuItem value={"None"}>{messages[language]?.all}</MenuItem>
+                <MenuItem value={"ejercicioLetras"}>{messages[language]?.letterExercise}</MenuItem>
+                <MenuItem value={"ejercicioDesplazamiento"}>{messages[language]?.displacementExercise}</MenuItem>
+                <MenuItem value={"operacionesMatematicas"}>{messages[language]?.mathOperations}</MenuItem>
+                <MenuItem value={"memoriseNumber"}>{messages[language]?.memorizeNumbers}</MenuItem>
+                <MenuItem value={"matchFigures"}>{messages[language]?.matchFigures}</MenuItem>
+                <MenuItem value={"ejercicioNumerosIguales"}>{messages[language]?.equalNumbersExercise}</MenuItem>
               </Select>
             </FormControl>
 
@@ -94,7 +97,7 @@ const Charts = ({ filteredStats, getJuego, getDificultad }) => {
             <FormGroup>
               <FormControlLabel
                 control={<Checkbox checked={filterByDates} onChange={(e) => setFilterByDates(e.target.checked)} />}
-                label="Filtrar por fecha"
+                label={messages[language]?.filterByDate}
               />
             </FormGroup>
 
@@ -102,13 +105,13 @@ const Charts = ({ filteredStats, getJuego, getDificultad }) => {
             {filterByDates && (
               <>
                 <DatePicker
-                  label="Desde"
+                  label={messages[language]?.from}
                   value={filters.minDate}
                   onChange={(newValue) => setFilters({ ...filters, minDate: newValue })}
                   renderInput={(params) => <TextField {...params} size="small" />}
                 />
                 <DatePicker
-                  label="Hasta"
+                  label={messages[language]?.to}
                   value={filters.maxDate}
                   onChange={(newValue) => setFilters({ ...filters, maxDate: newValue })}
                   renderInput={(params) => <TextField {...params} size="small" />}
@@ -124,7 +127,7 @@ const Charts = ({ filteredStats, getJuego, getDificultad }) => {
             {filteredData.length === 0 && (
               <Box className={styles.noDataBox}>
                 <Button disabled>
-                  <Typography variant={"h4"}>No hay datos</Typography>
+                  <Typography variant={"h4"}>{messages[language]?.noData}</Typography>
                 </Button>
               </Box>
             )}
@@ -133,7 +136,7 @@ const Charts = ({ filteredStats, getJuego, getDificultad }) => {
 
           {/* Contenedor para la tabla */}
           <Box className={styles.tableContainer}>
-            <Typography textAlign={"center"}>Tabla de estadísticas</Typography>
+            <Typography textAlign={"center"}>{messages[language]?.statsTable}</Typography>
             <TableStats stats={filteredData} getJuego={getJuego} getDificultad={getDificultad} />
           </Box>
         </Paper>

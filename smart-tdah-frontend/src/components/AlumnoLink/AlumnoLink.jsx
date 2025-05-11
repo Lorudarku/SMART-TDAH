@@ -34,7 +34,7 @@ function AlumnoLink({ alumnoData, backgroundColor, isLoggedIn }) {
             {nombre} {apellidos}
           </h1>
           <p className={styles.AlumnoCursoEmail}>
-            ({curso}) ······ {email}
+            ({curso}) - - - {email}
           </p>
         </div>
       </div>

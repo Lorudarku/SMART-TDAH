@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { backendUrl } from '../../utils/constants';
 import { Box, Typography, Avatar, Paper } from '@mui/material';
+import { useLanguage } from '../../hooks/LanguageContext';
+import messages from '../../utils/translations.json';
 
 const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState(null);
   const [backgroundColor, setBackgroundColor] = useState(null); // Estado para almacenar el color de fondo
+  const { language } = useLanguage(); // Obtiene el idioma actual
 
   // Genera las iniciales del nombre y apellidos
   const getInitials = (nombre, apellidos) => {
@@ -29,7 +32,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        setError('No token provided');
+        setError(messages[language]?.noTokenProvided);
         return;
       }
 
@@ -46,19 +49,19 @@ const Profile = () => {
           setBackgroundColor(generateRandomColor());
         }
       } catch (err) {
-        setError('Error fetching profile data');
+        setError(messages[language]?.fetchError);
       }
     };
 
     fetchProfile();
-  }, [backgroundColor]); // Dependencia para asegurarse de que el color no se recalcula
+  }, [backgroundColor, language]); // Dependencia para asegurarse de que el idioma se actualiza
 
   if (error) {
     return <Typography color="error">{error}</Typography>;
   }
 
   if (!profileData) {
-    return <Typography>Cargando...</Typography>;
+    return <Typography>{messages[language]?.loading}</Typography>;
   }
 
   const initials = getInitials(profileData.nombre, profileData.apellidos);
@@ -92,13 +95,13 @@ const Profile = () => {
         {/* Detalles del perfil */}
         <Box display="flex" flexDirection="column" alignItems="center">
           <Typography variant="body1">
-            <strong>Nombre:</strong> {profileData.nombre}
+            <strong>{messages[language]?.name}:</strong> {profileData.nombre}
           </Typography>
           <Typography variant="body1">
-            <strong>Apellidos:</strong> {profileData.apellidos}
+            <strong>{messages[language]?.lastName}:</strong> {profileData.apellidos}
           </Typography>
           <Typography variant="body1">
-            <strong>Email:</strong> {profileData.email}
+            <strong>{messages[language]?.email}:</strong> {profileData.email}
           </Typography>
         </Box>
       </Paper>

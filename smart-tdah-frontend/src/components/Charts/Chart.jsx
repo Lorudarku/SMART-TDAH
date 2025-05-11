@@ -53,13 +53,13 @@ const Chart = ({ filteredStats }) => {
   };
 
   const CustomizedXTick = (props) => {
-    const { x, y, stroke, payload } = props;
+    const { x, y, payload } = props;
     return (
       <g transform={`translate(${x},${y})`}>
         <text x={0} y={0} dy={16} fill="#666">
           <tspan textAnchor="middle" x="0" fontSize={"13px"}>
             {payload.value instanceof Date &&
-              format(payload.value, "dd/MM/yyyy")}
+              format(payload.value, "dd/MM/yy")} {/* Abrevia el año */}
           </tspan>
           <tspan textAnchor="middle" x="0" dy="15" fontSize={"12px"}>
             {payload.value instanceof Date && format(payload.value, "HH:mm")}

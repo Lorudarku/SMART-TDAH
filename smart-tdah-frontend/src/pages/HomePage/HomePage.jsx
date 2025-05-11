@@ -7,7 +7,7 @@ import { Navigate } from "react-router-dom";
 import logo from "../../assets/logo1.png";
 
 function HomePage({ isLoggedIn, setIsLoggedIn }) {
-  const { language } = useLanguage();
+  const { language } = useLanguage(); // Obtiene el idioma actual
 
   return isLoggedIn ? (
     <Box display="flex" justifyContent="center" mt={4} mb={10}>

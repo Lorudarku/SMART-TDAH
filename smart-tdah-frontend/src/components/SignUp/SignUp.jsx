@@ -4,6 +4,8 @@ import { Container, TextField, Button, Typography, Box } from '@mui/material';
 import axios from 'axios';
 import { backendUrl } from '../../utils/constants';
 import styles from './signUp.module.scss'; // Importa los estilos
+import { useLanguage } from '../../hooks/LanguageContext';
+import messages from '../../utils/translations.json';
 
 const SignUp = () => {
   const [nombre, setNombre] = useState('');
@@ -12,6 +14,7 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { language } = useLanguage(); // Obtiene el idioma actual
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -20,7 +23,7 @@ const SignUp = () => {
       console.log('User registered:', response.data);
       navigate('/login');
     } catch (err) {
-      setError('Error registering new user');
+      setError(messages[language]?.signUpError);
     }
   };
 
@@ -28,7 +31,7 @@ const SignUp = () => {
     <Container>
       <Box className={styles.boxContainer}>
         <Typography component="h1" variant="h5" className={styles.titleSignUp}>
-          Sign Up
+          {messages[language]?.signUpTitle}
         </Typography>
         <Box component="form" onSubmit={handleSignUp} noValidate className={styles.form}>
           <TextField
@@ -36,7 +39,7 @@ const SignUp = () => {
             required
             fullWidth
             id="Nombre"
-            label="Nombre"
+            label={messages[language]?.name}
             name="Nombre"
             autoComplete="Nombre"
             autoFocus
@@ -48,7 +51,7 @@ const SignUp = () => {
             required
             fullWidth
             id="Apellidos"
-            label="Apellidos"
+            label={messages[language]?.lastName}
             name="Apellidos"
             autoComplete="Apellidos"
             value={apellidos}
@@ -59,7 +62,7 @@ const SignUp = () => {
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label={messages[language]?.email}
             name="email"
             autoComplete="email"
             value={email}
@@ -70,7 +73,7 @@ const SignUp = () => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label={messages[language]?.password}
             type="password"
             id="password"
             autoComplete="current-password"
@@ -83,7 +86,7 @@ const SignUp = () => {
             variant="contained"
             className={styles.submitButton}
           >
-            Sign Up
+            {messages[language]?.signUpButton}
           </Button>
           {error && <Typography color="error">{error}</Typography>}
         </Box>

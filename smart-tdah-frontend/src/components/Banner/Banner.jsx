@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react'; // Import useState here
-import { Toolbar, Typography, Switch, IconButton, Menu, MenuItem, Divider } from '@mui/material'; // Include IconButton, Menu, MenuItem
-import { WbSunny, NightlightRound, Language, Logout } from '@mui/icons-material'; // Include Language icon
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { Toolbar, Typography, Switch, IconButton, Menu, MenuItem, Divider } from '@mui/material';
+import { WbSunny, NightlightRound, Language, Logout } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { ColorModeContext } from '../../App';
 import { useLanguage } from '../../hooks/LanguageContext';
 import styles from './banner.module.scss';

@@ -23,7 +23,7 @@ function AlumnoData({ isLoggedIn }) {
   useEffect(() => {
     if (!id_alumno || isNaN(id_alumno)) {
       console.error("Invalid id_alumno:", id_alumno); // Log para depuración
-      setError('Invalid student ID'); // Valida que id_alumno no sea undefined o no numérico
+      setError(messages[language]?.invalidStudentId); // Valida que id_alumno no sea undefined o no numérico
       setLoading(false);
       return;
     }
@@ -31,7 +31,7 @@ function AlumnoData({ isLoggedIn }) {
     const fetchAlumnoData = async () => {
       const token = localStorage.getItem('token'); // Obtener el token JWT del localStorage.
       if (!token) {
-        setError('No token provided'); // Mostrar un mensaje de error.
+        setError(messages[language]?.noTokenProvided); // Mostrar un mensaje de error.
         setLoading(false);
         return;
       }
@@ -67,12 +67,12 @@ function AlumnoData({ isLoggedIn }) {
         setFilteredStats(alumnoEjercicioData); // Almacena las estadísticas en el estado.
         setLoading(false); // Indica que se han cargado las estadísticas.
       } catch (err) {
-        setError('Error fetching stats');
+        setError(messages[language]?.fetchError);
         setLoading(false);
       }
     };
     fetchAlumnoData();
-  }, [id_alumno]);
+  }, [id_alumno, language]);
 
   const handleDownloadReport = async () => {
     if (statsRef.current) {
@@ -91,8 +91,7 @@ function AlumnoData({ isLoggedIn }) {
 
         // Restaurar estilos originales
         statsRef.current.style.backgroundColor = originalBackground;
-
-        const imgData = canvas.toDataURL('image/png'); // Convierte el canvas a base64
+        
         const imgWidth = 500; // Ancho de la imagen en el PDF
         const pageHeight = 700; // Altura de la página en el PDF
         const imgHeight = (canvas.height * imgWidth) / canvas.width; // Escala la altura de la imagen
@@ -128,9 +127,9 @@ function AlumnoData({ isLoggedIn }) {
         const docDefinition = { content: pdfContent };
 
         // Genera y descarga el PDF
-        pdfMake.createPdf(docDefinition).download(`informe_alumno_${id_alumno}.pdf`);
+        pdfMake.createPdf(docDefinition).download(`${messages[language]?.reportFileName}_${id_alumno}.pdf`);
       } catch (err) {
-        console.error('Error generating report:', err);
+        console.error(messages[language]?.reportError, err);
       }
     }
   };
@@ -158,7 +157,7 @@ function AlumnoData({ isLoggedIn }) {
       {/* Botón para descargar el informe */}
       <Box display="flex" justifyContent="flex-end" p={2}>
         <Button variant="contained" color="primary" onClick={handleDownloadReport}>
-          Descargar informe
+          {messages[language]?.downloadReport}
         </Button>
       </Box>
 

@@ -5,12 +5,15 @@ import { Container, TextField, Button, Typography, Box, Link } from '@mui/materi
 import { backendUrl } from '../../utils/constants';
 import styles from './login.module.scss';
 import logo from '../../assets/logo1.png';
+import { useLanguage } from '../../hooks/LanguageContext';
+import messages from '../../utils/translations.json';
 
 const Login = ({ setIsLoggedIn }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { language } = useLanguage(); // Obtiene el idioma actual
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,7 +23,7 @@ const Login = ({ setIsLoggedIn }) => {
       setIsLoggedIn(true); // Actualizar el estado de autenticación
       navigate('/'); // Redirigir al usuario a la página principal
     } catch (err) {
-      setError('Invalid credentials');
+      setError(messages[language]?.invalidCredentials);
     }
   };
 
@@ -31,7 +34,7 @@ const Login = ({ setIsLoggedIn }) => {
         <img src={logo} alt="Logo" className={styles.logo} />
 
         <Typography component="h1" variant="h5" className={styles.titleLogin}>
-            Login
+          {messages[language]?.loginTitle}
         </Typography>
         <Box component="form" onSubmit={handleLogin} noValidate>
           <TextField
@@ -39,7 +42,7 @@ const Login = ({ setIsLoggedIn }) => {
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label={messages[language]?.email}
             name="email"
             autoComplete="email"
             autoFocus
@@ -51,7 +54,7 @@ const Login = ({ setIsLoggedIn }) => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label={messages[language]?.password}
             type="password"
             id="password"
             autoComplete="current-password"
@@ -64,13 +67,13 @@ const Login = ({ setIsLoggedIn }) => {
             variant="contained"
             className={styles.submitButton}
           >
-            Login
+            {messages[language]?.loginButton}
           </Button>
           {error && <Typography color="error">{error}</Typography>}
           <Typography variant="body2">
-            {"Don't have an account? "}
+            {messages[language]?.noAccount}{' '}
             <Link href="#" onClick={() => navigate('/signup')}>
-              Sign Up
+              {messages[language]?.signUp}
             </Link>
           </Typography>
         </Box>

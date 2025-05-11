@@ -6,6 +6,38 @@ import messages from "../../utils/translations.json";
 const TableStats = ({ stats, getJuego, getDificultad }) => {
   const { language } = useLanguage(); // Obtiene el idioma actual
 
+  const translateJuego = (juego) => {
+    switch (juego) {
+      case "ejercicioLetras":
+        return messages[language]?.letterExercise;
+      case "ejercicioDesplazamiento":
+        return messages[language]?.displacementExercise;
+      case "operacionesMatematicas":
+        return messages[language]?.mathOperations;
+      case "memoriseNumber":
+        return messages[language]?.memorizeNumbers;
+      case "matchFigures":
+        return messages[language]?.matchFigures;
+      case "ejercicioNumerosIguales":
+        return messages[language]?.equalNumbersExercise;
+      default:
+        return juego || "-";
+    }
+  };
+
+  const translateDificultad = (dificultad) => {
+    switch (dificultad) {
+      case "Fácil":
+        return messages[language]?.easy;
+      case "Normal":
+        return messages[language]?.normal;
+      case "Difícil":
+        return messages[language]?.hard;
+      default:
+        return dificultad || "-";
+    }
+  };
+
   return (
     <TableContainer>
       <Table id="table">
@@ -69,8 +101,8 @@ const TableStats = ({ stats, getJuego, getDificultad }) => {
               <TableCell>{row.y}</TableCell>
               <TableCell>{row.z}</TableCell>
               <TableCell>{row.r}%</TableCell>
-              <TableCell>{getJuego(row.x)}</TableCell>
-              <TableCell>{getDificultad(row.x)}</TableCell>
+              <TableCell>{translateJuego(getJuego(row.x))}</TableCell>
+              <TableCell>{translateDificultad(getDificultad(row.x))}</TableCell>
             </TableRow>
           ))}
         </TableBody>

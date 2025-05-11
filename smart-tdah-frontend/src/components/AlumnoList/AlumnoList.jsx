@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; 
 import axios from 'axios';
 import styles from './AlumnoList.module.scss';
 import AlumnoLink from '../AlumnoLink/AlumnoLink';
@@ -9,7 +9,7 @@ import { Box, FormControl, InputLabel, MenuItem, Select, TextField, Paper, Typog
 import useDebounce from '../../hooks/useDebounce';
 
 // Componente reutilizable para el paginador
-const Paginator = ({ currentPage, totalPages, onPrevious, onNext }) => (
+const Paginator = ({ currentPage, totalPages, onPrevious, onNext, language }) => (
   <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
     <Button
       variant="contained"
@@ -17,10 +17,10 @@ const Paginator = ({ currentPage, totalPages, onPrevious, onNext }) => (
       disabled={currentPage <= 1} // Deshabilitar si estamos en la primera página
       sx={{ marginRight: 2 }}
     >
-      Anterior
+      {messages[language]?.previous}
     </Button>
     <Typography variant="body1">
-      Página {currentPage} de {totalPages}
+      {messages[language]?.page} {currentPage} {messages[language]?.of} {totalPages}
     </Typography>
     <Button
       variant="contained"
@@ -28,7 +28,7 @@ const Paginator = ({ currentPage, totalPages, onPrevious, onNext }) => (
       disabled={currentPage >= totalPages} // Deshabilitar si estamos en la última página
       sx={{ marginLeft: 2 }}
     >
-      Siguiente
+      {messages[language]?.next}
     </Button>
   </Box>
 );
@@ -56,7 +56,7 @@ function AlumnoList() {
     return color;
   };
 
-  const fetchAlumnos = async () => {
+  const fetchAlumnos = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       setError(messages[language]?.noTokenProvided);
@@ -101,11 +101,11 @@ function AlumnoList() {
       setError(messages[language]?.fetchError);
       setLoading(false);
     }
-  };
+  }, [language, currentPage, pageSize, debouncedQuery, filterBy, alumnoColors]);
 
   useEffect(() => {
     fetchAlumnos();
-  }, [currentPage, pageSize, debouncedQuery, filterBy]);
+  }, [fetchAlumnos]);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -170,14 +170,14 @@ function AlumnoList() {
 
           {/* Selector de tamaño de página */}
           <FormControl size="small" className={styles.pageSizeSelector}>
-            <InputLabel>{messages[language]?.pageSize || 'Tamaño página'}</InputLabel>
+            <InputLabel>{messages[language]?.pageSize}</InputLabel>
             <Select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value)); // Actualizar el tamaño de página
                 setCurrentPage(1); // Reiniciar la página actual al cambiar el tamaño de página
               }}
-              label={messages[language]?.pageSize || 'Tamaño página'}
+              label={messages[language]?.pageSize}
             >
               <MenuItem value={8}>8</MenuItem>
               <MenuItem value={16}>16</MenuItem>
@@ -193,6 +193,7 @@ function AlumnoList() {
           totalPages={totalPages}
           onPrevious={handlePreviousPage}
           onNext={handleNextPage}
+          language={language}
         />
 
         {/* Lista de alumnos */}
@@ -208,6 +209,7 @@ function AlumnoList() {
           totalPages={totalPages}
           onPrevious={handlePreviousPage}
           onNext={handleNextPage}
+          language={language}
         />
       </Paper>
     </Box>
