@@ -1,12 +1,15 @@
 import { useParams, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { useTheme } from '@mui/material/styles'; // Importa el hook useTheme
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Charts from '../../components/Charts/Charts';
 import { backendUrl } from '../../utils/constants';
 import styles from './AlumnoData.module.scss'; // Importa los estilos
 import { useLanguage } from '../../hooks/LanguageContext'; // Importa el contexto de idioma
 import messages from '../../utils/translations.json'; // Importa las traducciones
+import html2canvas from 'html2canvas'; // Importa la librería para capturar la instantánea
+import pdfMake from 'pdfmake/build/pdfmake'; // Importa solo pdfMake
+import { Box, Button } from '@mui/material';
 
 function AlumnoData({ isLoggedIn }) {
   const { id_alumno } = useParams(); // Obtiene el id del alumno de los parámetros de la URL.
@@ -15,6 +18,7 @@ function AlumnoData({ isLoggedIn }) {
   const [error, setError] = useState(null); // Estado que almacena un mensaje de error.
   const theme = useTheme(); // Obtiene el tema actual (claro u oscuro)
   const { language } = useLanguage(); // Obtiene el idioma actual
+  const statsRef = useRef(); // Referencia al contenedor de estadísticas
 
   useEffect(() => {
     if (!id_alumno || isNaN(id_alumno)) {
@@ -70,8 +74,69 @@ function AlumnoData({ isLoggedIn }) {
     fetchAlumnoData();
   }, [id_alumno]);
 
+  const handleDownloadReport = async () => {
+    if (statsRef.current) {
+      try {
+        // Ajustar estilos temporalmente
+        const originalBackground = statsRef.current.style.backgroundColor;
+
+        // Establece el fondo según el tema actual
+        statsRef.current.style.backgroundColor =
+          theme.palette.mode === 'dark' ? theme.palette.background.default : '#ffffff';
+
+        const canvas = await html2canvas(statsRef.current, {
+          useCORS: true,
+          scale: 2,
+        });
+
+        // Restaurar estilos originales
+        statsRef.current.style.backgroundColor = originalBackground;
+
+        const imgData = canvas.toDataURL('image/png'); // Convierte el canvas a base64
+        const imgWidth = 500; // Ancho de la imagen en el PDF
+        const pageHeight = 700; // Altura de la página en el PDF
+        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Escala la altura de la imagen
+        const totalPages = Math.ceil(imgHeight / pageHeight); // Calcula el número total de páginas
+
+        const pdfContent = [];
+        for (let i = 0; i < totalPages; i++) {
+          const cropCanvas = document.createElement('canvas');
+          const cropContext = cropCanvas.getContext('2d');
+          cropCanvas.width = canvas.width;
+          cropCanvas.height = Math.min(pageHeight * (canvas.width / imgWidth), canvas.height - i * pageHeight * (canvas.width / imgWidth));
+
+          cropContext.drawImage(
+            canvas,
+            0,
+            i * pageHeight * (canvas.width / imgWidth),
+            canvas.width,
+            cropCanvas.height,
+            0,
+            0,
+            cropCanvas.width,
+            cropCanvas.height
+          );
+
+          const croppedImgData = cropCanvas.toDataURL('image/png');
+          pdfContent.push({
+            image: croppedImgData,
+            width: imgWidth,
+            margin: [0, 0, 0, i < totalPages - 1 ? 20 : 0], // Añade margen inferior excepto en la última página
+          });
+        }
+
+        const docDefinition = { content: pdfContent };
+
+        // Genera y descarga el PDF
+        pdfMake.createPdf(docDefinition).download(`informe_alumno_${id_alumno}.pdf`);
+      } catch (err) {
+        console.error('Error generating report:', err);
+      }
+    }
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>{messages[language]?.loading}</div>;
   }
 
   if (error) {
@@ -90,43 +155,52 @@ function AlumnoData({ isLoggedIn }) {
 
   return isLoggedIn ? (
     <div>
-      {/* Contenedor para la información del alumno */}
-      <div className={styles.alumnoInfoContainer}>
-        <h1 className={styles.alumnoName}>
-          {filteredStats[0]?.nombre} {filteredStats[0]?.apellidos}
-        </h1>
-        <p
-          className={styles.alumnoDetails}
-          style={{
-            color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
-          }}
-        >
-          <strong>{messages[language]?.email}:</strong> {filteredStats[0]?.email}
-        </p>
-        <p
-          className={styles.alumnoDetails}
-          style={{
-            color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
-          }}
-        >
-          <strong>{messages[language]?.course}:</strong> {filteredStats[0]?.curso}
-        </p>
-        <p
-          className={styles.alumnoDetails}
-          style={{
-            color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
-          }}
-        >
-          <strong>{messages[language]?.gender}:</strong> {filteredStats[0]?.genero || '-'}
-        </p>
-      </div>
+      {/* Botón para descargar el informe */}
+      <Box display="flex" justifyContent="flex-end" p={2}>
+        <Button variant="contained" color="primary" onClick={handleDownloadReport}>
+          Descargar informe
+        </Button>
+      </Box>
 
-      {/* Contenedor para las gráficas */}
-      <Charts
-        filteredStats={filteredStats}
-        getJuego={getJuego}
-        getDificultad={getDificultad}
-      />
+      {/* Contenedor para la información del alumno */}
+      <div ref={statsRef}>
+        <div className={styles.alumnoInfoContainer}>
+          <h1 className={styles.alumnoName}>
+            {filteredStats[0]?.nombre} {filteredStats[0]?.apellidos}
+          </h1>
+          <p
+            className={styles.alumnoDetails}
+            style={{
+              color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
+            }}
+          >
+            <strong>{messages[language]?.email}:</strong> {filteredStats[0]?.email}
+          </p>
+          <p
+            className={styles.alumnoDetails}
+            style={{
+              color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
+            }}
+          >
+            <strong>{messages[language]?.course}:</strong> {filteredStats[0]?.curso}
+          </p>
+          <p
+            className={styles.alumnoDetails}
+            style={{
+              color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555', // Gris en modo claro
+            }}
+          >
+            <strong>{messages[language]?.gender}:</strong> {filteredStats[0]?.genero || '-'}
+          </p>
+        </div>
+
+        {/* Contenedor para las gráficas */}
+        <Charts
+          filteredStats={filteredStats}
+          getJuego={getJuego}
+          getDificultad={getDificultad}
+        />
+      </div>
     </div>
   ) : (
     <main>
