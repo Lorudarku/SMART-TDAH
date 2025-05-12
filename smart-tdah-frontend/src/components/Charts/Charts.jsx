@@ -2,7 +2,7 @@ import { Box, Button, Checkbox, Container, FormControl, FormControlLabel, FormGr
 import { useEffect, useState, useRef, useCallback } from "react";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { es } from "date-fns/locale";
+import { enGB, es, ptBR } from "date-fns/locale"; // Importa los locales para los idiomas
 import Chart from "./Chart";
 import TableStats from "../Table/TableStats";
 import styles from "./Charts.module.scss";
@@ -20,6 +20,20 @@ const Charts = ({ filteredStats, getJuego, getDificultad }) => {
   });
   const [filterByDates, setFilterByDates] = useState(false); // Estado para activar/desactivar el filtro de fechas
   const [filteredData, setFilteredData] = useState(filteredStats);
+
+  // Mapea el idioma seleccionado al locale correspondiente de date-fns
+  const getLocale = () => {
+    switch (language) {
+      case "en":
+        return enGB; //Great Britain
+      case "es":
+        return es;
+      case "pt":
+        return ptBR;
+      default:
+        return ptBR;
+    }
+  };
 
   // Actualiza los datos filtrados según los filtros aplicados
   const updateFilters = useCallback(() => {
@@ -52,7 +66,7 @@ const Charts = ({ filteredStats, getJuego, getDificultad }) => {
   }, [updateFilters]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={getLocale()}>
       <Container className={styles.container}>
         <Paper elevation={5} className={styles.paper}>
           <Box className={styles.filtersContainer}>

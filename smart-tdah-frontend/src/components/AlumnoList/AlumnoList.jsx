@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'; 
+import React, { useState, useEffect, useCallback, useMemo } from 'react'; 
 import axios from 'axios';
 import styles from './AlumnoList.module.scss';
 import AlumnoLink from '../AlumnoLink/AlumnoLink';
@@ -35,7 +35,10 @@ const Paginator = ({ currentPage, totalPages, onPrevious, onNext, language }) =>
 
 function AlumnoList() {
   const [alumnos, setAlumnos] = useState([]);
-  const [alumnoColors, setAlumnoColors] = useState({}); // Estado para almacenar los colores de los alumnos
+  const [alumnoColors, setAlumnoColors] = useState(() => {
+    const storedColors = localStorage.getItem('alumnoColors');
+    return storedColors ? JSON.parse(storedColors) : {};
+  }); // Carga los colores desde localStorage
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { language } = useLanguage();
@@ -47,14 +50,15 @@ function AlumnoList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const generateRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
+  const colors = useMemo(() => ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF'], []); 
+
+  const assignRandomColor = useCallback(
+    (idAlumno) => {
+      const randomIndex = idAlumno % colors.length; // Asigna un color basado en el ID del alumno
+      return colors[randomIndex];
+    },
+    [colors] 
+  );
 
   const fetchAlumnos = useCallback(async () => {
     const token = localStorage.getItem('token');
@@ -89,19 +93,20 @@ function AlumnoList() {
       const newColors = { ...alumnoColors };
       fetchedAlumnos.forEach((alumno) => {
         if (!newColors[alumno.idAlumno]) {
-          newColors[alumno.idAlumno] = generateRandomColor();
+          newColors[alumno.idAlumno] = assignRandomColor(alumno.idAlumno);
         }
       });
 
-      setAlumnoColors(newColors); // Actualizar los colores en el estado
       setAlumnos(fetchedAlumnos);
+      setAlumnoColors(newColors); // Actualiza los colores en el estado
+      localStorage.setItem('alumnoColors', JSON.stringify(newColors)); // Guarda los colores en localStorage
       setTotalPages(response.data.totalPages);
       setLoading(false);
     } catch (err) {
       setError(messages[language]?.fetchError);
       setLoading(false);
     }
-  }, [language, currentPage, pageSize, debouncedQuery, filterBy, alumnoColors]);
+  }, [language, currentPage, pageSize, debouncedQuery, filterBy, alumnoColors, assignRandomColor]);
 
   useEffect(() => {
     fetchAlumnos();
@@ -131,7 +136,7 @@ function AlumnoList() {
   return (
     <Box display="flex" flexDirection="column" alignItems="center" mt={4} mb={10}>
       {/* Título de la lista de alumnos */}
-      <Typography variant="h5" fontWeight="bold" gutterBottom textAlign="center">
+      <Typography className={styles.title} gutterBottom>
         {messages[language]?.studentList}
       </Typography>
 

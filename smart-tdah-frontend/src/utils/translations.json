@@ -60,7 +60,16 @@
     "downloadReport": "Descargar informe",
     "reportFileName": "informe_alumno",
     "reportError": "Error al generar el informe",
-    "settingsTitle": "Configuración"
+    "settingsTitle": "Configuración",
+    "changePasswordTitle": "Cambiar Contraseña",
+    "currentPassword": "Contraseña Actual",
+    "newPassword": "Nueva Contraseña",
+    "confirmNewPassword": "Confirmar Nueva Contraseña",
+    "changePasswordButton": "Cambiar Contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordChangeSuccess": "Contraseña cambiada con éxito",
+    "passwordChangeError": "Error al cambiar la contraseña",
+    "profileTitle": "Perfil"
   },
   "en": {
     "welcome": "Welcome to SMART-TDAH",
@@ -123,7 +132,16 @@
     "downloadReport": "Download Report",
     "reportFileName": "student_report",
     "reportError": "Error generating report",
-    "settingsTitle": "Settings"
+    "settingsTitle": "Settings",
+    "changePasswordTitle": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "changePasswordButton": "Change Password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordChangeSuccess": "Password changed successfully",
+    "passwordChangeError": "Error changing password",
+    "profileTitle": "Profile"
   },
   "pt": {
     "welcome": "Bem-vindo ao SMART-TDAH",
@@ -186,6 +204,15 @@
     "downloadReport": "Baixar Relatório",
     "reportFileName": "relatorio_estudante",
     "reportError": "Erro ao gerar o relatório",
-    "settingsTitle": "Configurações"
+    "settingsTitle": "Configurações",
+    "changePasswordTitle": "Alterar Senha",
+    "currentPassword": "Senha Atual",
+    "newPassword": "Nova Senha",
+    "confirmNewPassword": "Confirmar Nova Senha",
+    "changePasswordButton": "Alterar Senha",
+    "passwordMismatch": "As senhas não coincidem",
+    "passwordChangeSuccess": "Senha alterada com sucesso",
+    "passwordChangeError": "Erro ao alterar a senha",
+    "profileTitle": "Perfil"
   }
 }

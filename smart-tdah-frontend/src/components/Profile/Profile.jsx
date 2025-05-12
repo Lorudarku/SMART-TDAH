@@ -8,7 +8,10 @@ import messages from '../../utils/translations.json';
 const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState(null);
-  const [backgroundColor, setBackgroundColor] = useState(null); // Estado para almacenar el color de fondo
+  const [backgroundColor, setBackgroundColor] = useState(() => {
+    const storedColor = localStorage.getItem('profileColor');
+    return storedColor || null; // Carga el color desde localStorage si existe
+  });
   const { language } = useLanguage(); // Obtiene el idioma actual
 
   // Genera las iniciales del nombre y apellidos
@@ -44,9 +47,11 @@ const Profile = () => {
         });
         setProfileData(response.data);
 
-        // Generar y establecer el color de fondo solo la primera vez que se cargan los datos
+        // Generar y establecer el color de fondo solo si no existe en localStorage
         if (!backgroundColor) {
-          setBackgroundColor(generateRandomColor());
+          const newColor = generateRandomColor();
+          setBackgroundColor(newColor);
+          localStorage.setItem('profileColor', newColor); // Guarda el color en localStorage
         }
       } catch (err) {
         setError(messages[language]?.fetchError);
@@ -72,13 +77,18 @@ const Profile = () => {
         elevation={5}
         sx={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
           padding: 3,
           maxWidth: 800,
           width: '100%',
         }}
       >
+        {/* Título pequeño "Perfil" */}
+        <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
+          {messages[language]?.profileTitle}
+        </Typography>
+
         {/* Foto de perfil */}
         <Avatar
           sx={{
@@ -86,23 +96,32 @@ const Profile = () => {
             width: 150,
             height: 150,
             fontSize: '4rem',
-            marginRight: 10,
+            marginBottom: 2,
           }}
         >
           {initials}
         </Avatar>
 
         {/* Detalles del perfil */}
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <Typography variant="body1">
-            <strong>{messages[language]?.name}:</strong> {profileData.nombre}
-          </Typography>
-          <Typography variant="body1">
-            <strong>{messages[language]?.lastName}:</strong> {profileData.apellidos}
-          </Typography>
-          <Typography variant="body1">
-            <strong>{messages[language]?.email}:</strong> {profileData.email}
-          </Typography>
+        <Box display="flex" flexDirection="column" alignItems="center" width="100%">
+          <Box display="flex" justifyContent="center" mb={1}>
+            <Typography variant="body1" sx={{ fontWeight: 'bold', marginRight: 1 }}>
+              {messages[language]?.name}:
+            </Typography>
+            <Typography variant="body1">{profileData.nombre}</Typography>
+          </Box>
+          <Box display="flex" justifyContent="center" mb={1}>
+            <Typography variant="body1" sx={{ fontWeight: 'bold', marginRight: 1 }}>
+              {messages[language]?.lastName}:
+            </Typography>
+            <Typography variant="body1">{profileData.apellidos}</Typography>
+          </Box>
+          <Box display="flex" justifyContent="center">
+            <Typography variant="body1" sx={{ fontWeight: 'bold', marginRight: 1 }}>
+              {messages[language]?.email}:
+            </Typography>
+            <Typography variant="body1">{profileData.email}</Typography>
+          </Box>
         </Box>
       </Paper>
     </Box>

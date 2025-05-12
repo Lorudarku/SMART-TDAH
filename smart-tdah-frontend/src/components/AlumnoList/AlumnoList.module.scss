@@ -10,9 +10,10 @@
     padding: 20px; /* Añade espacio interno */
 }
 
-.title{
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+.title {
   text-align: center;
+  font-weight: bold !important;
+  font-size: 2rem !important;
 }
 
 .filtersContainer {

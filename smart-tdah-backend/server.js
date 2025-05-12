@@ -220,6 +220,41 @@ app.post('/login', async (req, res) => { //req: request, res: response
   }
 });
 
+// Ruta para cambiar la contraseña
+app.post('/change-password', checkToken, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const idProfesor = req.userId;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).send('Current and new passwords are required');
+  }
+
+  try {
+    const client = await pool.connect();
+    const result = await client.query('SELECT password FROM profesores WHERE id_profesor = $1', [idProfesor]);
+
+    if (result.rows.length === 0) {
+      client.release();
+      return res.status(404).send('User not found');
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, result.rows[0].password);
+    if (!isMatch) {
+      client.release();
+      return res.status(401).send('Current password is incorrect');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await client.query('UPDATE profesores SET password = $1 WHERE id_profesor = $2', [hashedPassword, idProfesor]);
+    client.release();
+
+    return res.status(200).send('Password changed successfully');
+  } catch (err) {
+    console.error('Error changing password:', err.message);
+    return res.status(500).send('Error changing password');
+  }
+});
+
 // ############################################################################################################################
 
 // Iniciar el servidor

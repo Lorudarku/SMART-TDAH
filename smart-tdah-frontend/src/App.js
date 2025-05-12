@@ -1,7 +1,7 @@
 // src/App.js
-import React, { useState, createContext, useMemo } from "react";
+import React, { useState, createContext, useMemo, useEffect } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { LanguageProvider } from './hooks/LanguageContext'; 
 import Banner from "./components/Banner/Banner";
 import Login from "./components/Login/Login";
@@ -17,15 +17,32 @@ import Settings from "./pages/Settings/Settings";
 export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
 function App() {
-  const [mode, setMode] = useState("light");
+  const [mode, setMode] = useState(() => {
+    // Carga el tema desde localStorage o usa "light" como predeterminado
+    return localStorage.getItem("themeMode") || "light";
+  });
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado de autenticación
 
-  const colorMode = useMemo( // Función para alternar el tema
-    () => ({ // Devuelve un objeto con la función para cambiar el tema y el modo actual
-      toggleColorMode: () => { // Función para cambiar el tema
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light")); // Cambiar el modo
+  useEffect(() => {
+    // Verifica si el token existe en localStorage al cargar la aplicación
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsLoggedIn(true); // Si el token existe, establece el estado como autenticado
+    } else {
+      setIsLoggedIn(false); // Si no hay token, establece el estado como no autenticado
+    }
+  }, []); // Solo se ejecuta al cargar la aplicación
+
+  const colorMode = useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prevMode) => {
+          const newMode = prevMode === "light" ? "dark" : "light";
+          localStorage.setItem("themeMode", newMode); // Guarda el tema en localStorage
+          return newMode;
+        });
       },
-      mode, // Pasamos el modo actual ("light" o "dark")
+      mode,
     }),
     [mode]
   );
@@ -53,19 +70,57 @@ function App() {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Router>
-            <Banner setIsLoggedIn={setIsLoggedIn}/>
+            <Banner setIsLoggedIn={setIsLoggedIn} />
             <Routes>
-              <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} /> 
+              <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path="/" element={<SidePanelLayout render= {<HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}/>} />
-              <Route path="/alumnos" element={<SidePanelLayout render= {<AlumnoList />}/>} />
-              <Route path="/alumnos/:id_alumno" element={<SidePanelLayout render= {<AlumnoData isLoggedIn={isLoggedIn} />}/>}/>
-              <Route path="/settings" element={<SidePanelLayout render={<Settings />} />} />
+              <Route
+                path="/"
+                element={
+                  isLoggedIn ? (
+                    <SidePanelLayout
+                      render={<HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}
+                    />
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
+              <Route
+                path="/alumnos"
+                element={
+                  isLoggedIn ? (
+                    <SidePanelLayout render={<AlumnoList />} />
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
+              <Route
+                path="/alumnos/:id_alumno"
+                element={
+                  isLoggedIn ? (
+                    <SidePanelLayout render={<AlumnoData isLoggedIn={isLoggedIn} />} />
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  isLoggedIn ? (
+                    <SidePanelLayout render={<Settings />} />
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
             </Routes>
           </Router>
         </ThemeProvider>
       </LanguageProvider>
-    </ColorModeContext.Provider>  
+    </ColorModeContext.Provider>
   );
 }
 

@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState } from 'react';
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('es'); // idioma predeterminado
+  const [language, setLanguage] = useState('pt'); // Idioma predeterminado
+  // Puedes cambiar 'pt' a 'en' o 'es' según tus necesidades
 
   // Función para cambiar el idioma
   const changeLanguage = (lang) => {
