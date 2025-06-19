@@ -258,6 +258,6 @@ app.post('/change-password', checkToken, async (req, res) => {
 // ############################################################################################################################
 
 // Iniciar el servidor
-app.listen(PORT, () => { // Iniciar el servidor en el puerto PORT
-  console.log(`Server running on port ${PORT}`); // Imprimir un mensaje en la consola
+app.listen(PORT, process.env.HOST || '0.0.0.0', () => { // Iniciar el servidor en el puerto PORT y en todas las interfaces
+  console.log(`Server running on http://${process.env.HOST || '0.0.0.0'}:${PORT}`); // Imprimir un mensaje en la consola
 });

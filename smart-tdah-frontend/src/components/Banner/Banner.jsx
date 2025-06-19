@@ -4,11 +4,54 @@ import { WbSunny, NightlightRound, Language, Logout } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom';
 import { ColorModeContext } from '../../App';
 import { useLanguage } from '../../hooks/LanguageContext';
-import styles from './banner.module.scss';
 import logo from '../../assets/favicon.ico';
 import flagEn from '../../assets/english.png';
 import flagEs from '../../assets/spanish.png';
 import flagPt from '../../assets/brazilian.png';
+
+// Estilos migrados desde banner.module.scss a objetos JS para uso con sx y Box
+const styles = {
+  toolbar: {
+    backgroundColor: '#047acf',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.5)',
+    position: 'fixed',
+    top: 0,
+    height: '64px',
+    width: '100%',
+    minWidth: '520px',
+    zIndex: 1000,
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    whiteSpace: 'nowrap', // Evita saltos de línea en el contenido
+  },
+  logoTitleContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    color: 'white',
+  },
+  rightContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginLeft: 'auto',
+    color: 'white',
+  },
+  divider: {
+    width: '2px',
+    height: '40px',
+    backgroundColor: 'white',
+    margin: '0px 10px',
+  },
+  title: {
+    fontFamily: 'Impact',
+    fontSize: '50px',
+    textDecoration: 'none',
+    color: 'white',
+    whiteSpace: 'nowrap', // Evita que el título se divida
+    overflow: 'hidden',
+    textOverflow: 'ellipsis', // Si el espacio es insuficiente, muestra puntos suspensivos
+  },
+};
 
 const Banner = ({ setIsLoggedIn }) => {
   const colorMode = useContext(ColorModeContext);
@@ -51,13 +94,20 @@ const Banner = ({ setIsLoggedIn }) => {
   };
 
   return (
-    <Toolbar className={styles.toolbar}>
-      <div className={styles.logoTitleContainer} onClick={() => navigate('/')}>
-        <img src={logo} alt="Logo" className={styles.logo} />
-        <Typography className={styles.title}>SMART-TDAH</Typography>
-      </div>
+    <Toolbar
+      sx={styles.toolbar}
+      disableGutters // Elimina padding horizontal por defecto de MUI Toolbar
+    >
+      {/* Logo y título agrupados */}
+      <Box sx={styles.logoTitleContainer} onClick={() => navigate('/')}> 
+        <img src={logo} alt="Logo" style={{ marginRight: 10 }} />
+        <Typography sx={styles.title}>
+          SMART-TDAH
+        </Typography>
+      </Box>
 
-      <div className={styles.rightContainer}>
+      {/* Contenedor derecho: idioma, switch, logout */}
+      <Box sx={styles.rightContainer}>
         <IconButton
           color="inherit"
           onClick={handleLanguageMenuOpen}
@@ -65,7 +115,7 @@ const Banner = ({ setIsLoggedIn }) => {
           sx={{ mr: 0 }}
         >
           <Language />
-          <Box display="flex" alignItems="center" className={styles.language}>
+          <Box display="flex" alignItems="center" sx={{ fontSize: 15, ml: 0.5 }}>
             <img
               src={getFlagForLanguage(language)}
               alt={language}
@@ -101,19 +151,18 @@ const Banner = ({ setIsLoggedIn }) => {
         </Menu>
 
         <Switch
-          className={styles.switch}
           checked={isDarkMode}
           onChange={colorMode.toggleColorMode}
           icon={<WbSunny style={{ color: "orange", position: "relative", top: "-1px" }} />} // Ajusta la posición del sol
           checkedIcon={<NightlightRound style={{ color: "yellow", position: "relative", top: "-1px" }} />} // Ajusta la posición de la luna
         />
 
-        <Divider className={styles.divider} />
+        <Divider sx={styles.divider} />
 
         <IconButton color="inherit" onClick={handleLogout}>
           <Logout />
         </IconButton>
-      </div>
+      </Box>
     </Toolbar>
   );
 };

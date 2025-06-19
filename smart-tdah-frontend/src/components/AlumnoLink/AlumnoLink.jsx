@@ -1,43 +1,137 @@
+// =============================
+// Componente AlumnoLink.jsx
+// =============================
+// Muestra un resumen visual de un alumno en la lista, con nombre, curso y email, y permite navegar a su ficha.
+// Estilos y lógica centralizados y explicados paso a paso.
+
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import styles from './AlumnoLink.module.scss';
+import { Avatar, Box, Typography, Paper, useTheme } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import EmailIcon from '@mui/icons-material/Email';
+import SchoolIcon from '@mui/icons-material/School';
 
+// =====================
+// Estilos centralizados
+// =====================
+// Todos los estilos visuales del componente están aquí agrupados y documentados.
+const styles = {
+  // --- Paper principal del alumno ---
+  alumno: (theme) => ({
+    display: 'flex', // Layout horizontal
+    alignItems: 'center', // Centra verticalmente
+    width: '80%', // Ocupa el 80% del contenedor padre
+    minWidth: 320, // No se hace demasiado pequeño
+    maxWidth: '100%', // Nunca sobresale
+    minHeight: 48, // Altura mínima
+    flexWrap: 'wrap', // Permite que el contenido baje si es necesario
+    wordBreak: 'break-word', // Rompe palabras largas
+    margin: '4px 0', // Espaciado vertical entre alumnos
+    borderRadius: 2, // Bordes redondeados
+    padding: '6px 16px', // Espaciado interno
+    cursor: 'pointer', // Cursor de mano al pasar por encima
+    transition: 'box-shadow 0.2s, background-color 0.2s', // Transiciones suaves
+    // Colores y bordes según el tema
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    border: `1px solid ${theme.palette.divider}`,
+    boxShadow: theme.shadows[2],
+    // Efecto hover visual
+    '&:hover': {
+      backgroundColor: theme.palette.action.hover,
+      boxShadow: theme.shadows[4],
+    },
+  }),
+  // --- Avatar del alumno (iniciales) ---
+  profileImage: (theme, backgroundColor) => ({
+    width: 48, // Tamaño del avatar
+    height: 48,
+    fontSize: 22, // Tamaño de letra de las iniciales
+    marginRight: 2, // Separación a la derecha
+    // Colores dinámicos según el color de fondo recibido o el color primario del tema
+    bgcolor: backgroundColor || theme.palette.primary.main,
+    color: theme.palette.getContrastText(backgroundColor || theme.palette.primary.main),
+  }),
+  // --- Nombre y apellidos ---
+  alumnoName: (theme) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1, // Espacio entre icono y texto
+    fontWeight: 'bold', // Negrita
+    fontSize: 18, // Tamaño grande
+    mb: 0.5, // Margen inferior
+    color: theme.palette.text.primary,
+  }),
+  // --- Curso y email ---
+  alumnoCursoEmail: (theme) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1, // Espacio entre iconos y texto
+    fontSize: 14, // Más pequeño
+    color: theme.palette.text.secondary,
+  }),
+};
+
+// =============================
+// Componente principal AlumnoLink
+// =============================
 function AlumnoLink({ alumnoData, backgroundColor, isLoggedIn }) {
+  // Hook de navegación de React Router
   const navigate = useNavigate();
+  // Hook de tema de Material UI (acceso a colores y modo)
+  const theme = useTheme();
 
+  // --- Función para manejar el click sobre el alumno ---
+  // Navega a la ficha del alumno usando su id
   const handleClick = () => {
-    if (alumnoData?.idAlumno) { // Verifica que idAlumno no sea undefined
+    if (alumnoData?.idAlumno) {
       navigate(`/alumnos/${alumnoData.idAlumno}`, { state: { isLoggedIn } });
     } else {
+      // Si no hay id, muestra un error en consola
       console.error("idAlumno is undefined for alumnoData:", alumnoData);
     }
   };
 
+  // --- Desestructuración de los datos del alumno ---
   const { nombre, apellidos, email, curso } = alumnoData;
 
+  // --- Función para obtener las iniciales del alumno ---
+  // Toma la primera letra del nombre y del primer apellido
   const getInitials = (nombre, apellidos) => {
     const firstName = nombre.split(' ')[0];
     const lastName = apellidos ? apellidos.split(' ')[0] : '';
     return `${firstName[0]}${lastName ? lastName[0] : ''}`.toUpperCase();
   };
 
+  // Iniciales calculadas para el avatar
   const initials = getInitials(nombre, apellidos);
 
+  // =============================
+  // Renderizado visual del alumno
+  // =============================
   return (
-    <div className={styles.AlumnoContainer} onClick={handleClick}>
-      <div className={styles.Alumno}>
-        <div className={styles.ProfileImage} style={{ backgroundColor }}>
+    // Contenedor centrado para el Paper
+    <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+      {/* Paper principal con todos los datos del alumno */}
+      <Paper elevation={2} sx={styles.alumno(theme)} onClick={handleClick}>
+        {/* Avatar con iniciales y color dinámico */}
+        <Avatar sx={styles.profileImage(theme, backgroundColor)}>
           {initials}
-        </div>
-        <div>
-          <h1 className={styles.AlumnoName}>
+        </Avatar>
+        {/* Datos del alumno: nombre, curso y email */}
+        <Box>
+          {/* Nombre y apellidos con icono */}
+          <Typography sx={styles.alumnoName(theme)}>
+            <PersonIcon fontSize="small" color="primary" />
             {nombre} {apellidos}
-          </h1>
-          <p className={styles.AlumnoCursoEmail}>
-            ({curso}) - - - {email}
-          </p>
-        </div>
-      </div>
+          </Typography>
+          {/* Curso y email con iconos */}
+          <Typography sx={styles.alumnoCursoEmail(theme)}>
+            <SchoolIcon fontSize="small" sx={{ mr: 0.5 }} />{curso}
+            <EmailIcon fontSize="small" sx={{ ml: 1, mr: 0.5 }} />{email}
+          </Typography>
+        </Box>
+      </Paper>
     </div>
   );
 }

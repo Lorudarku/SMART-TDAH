@@ -1,16 +1,69 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'; 
 import axios from 'axios';
-import styles from './AlumnoList.module.scss';
 import AlumnoLink from '../AlumnoLink/AlumnoLink';
 import { backendUrl } from '../../utils/constants';
 import { useLanguage } from '../../hooks/LanguageContext';
 import messages from '../../utils/translations.json';
-import { Box, FormControl, InputLabel, MenuItem, Select, TextField, Paper, Typography, Button } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, TextField, Paper, Typography, Button, useTheme } from '@mui/material';
 import useDebounce from '../../hooks/useDebounce';
+
+const styles = {
+  // --- Contenedor principal de la lista ---
+  alumnoList: (theme) => ({
+    padding: 2.5,
+    width: '100%',
+    backgroundColor: 'transparent', // No se distingue respecto al Paper padre
+    boxShadow: 'none',
+    borderRadius: 0,
+  }),
+  // --- Título de la lista ---
+  title: (theme) => ({
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: '2rem',
+    mb: 2,
+    color: theme.palette.text.primary,
+  }),
+  // --- Contenedor de filtros ---
+  filtersContainer: (theme) => ({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2.5,
+    padding: 2.5,
+    mb: 3,
+    width: '100%',
+    boxSizing: 'border-box',
+    flexWrap: 'wrap',
+    backgroundColor: theme.palette.background.default,
+    borderRadius: 4,
+    boxShadow: theme.shadows[2],
+    border: `1.5px solid ${theme.palette.divider}`,
+    transition: 'background-color 0.3s, color 0.3s, box-shadow 0.3s',
+  }),
+  // --- FormControl de filtro ---
+  filterFormControl: {
+    minWidth: 120,
+    flex: '1 1 120px',
+    maxWidth: 220,
+  },
+  // --- Input de búsqueda ---
+  filterQueryInput: (theme) => ({
+    flex: '2 1 160px',
+    minWidth: 100,
+    backgroundColor: theme.palette.background.default,
+  }),
+  // --- Selector de tamaño de página ---
+  pageSizeSelector: {
+    minWidth: 120,
+    flex: '1 1 120px',
+    maxWidth: 180,
+  },
+};
 
 // Componente reutilizable para el paginador
 const Paginator = ({ currentPage, totalPages, onPrevious, onNext, language }) => (
-  <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
+  <Box display="flex" justifyContent="center" alignItems="center">
     <Button
       variant="contained"
       onClick={onPrevious}
@@ -42,6 +95,7 @@ function AlumnoList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { language } = useLanguage();
+  const theme = useTheme(); // Acceso al tema actual
 
   const [filterBy, setFilterBy] = useState('nombre');
   const [query, setQuery] = useState('');
@@ -90,23 +144,25 @@ function AlumnoList() {
       }));
 
       // Generar colores solo para los alumnos que no tienen color asignado
-      const newColors = { ...alumnoColors };
-      fetchedAlumnos.forEach((alumno) => {
-        if (!newColors[alumno.idAlumno]) {
-          newColors[alumno.idAlumno] = assignRandomColor(alumno.idAlumno);
-        }
+      setAlumnoColors((prevColors) => {
+        const newColors = { ...prevColors };
+        fetchedAlumnos.forEach((alumno) => {
+          if (!newColors[alumno.idAlumno]) {
+            newColors[alumno.idAlumno] = assignRandomColor(alumno.idAlumno);
+          }
+        });
+        localStorage.setItem('alumnoColors', JSON.stringify(newColors));
+        return newColors;
       });
 
       setAlumnos(fetchedAlumnos);
-      setAlumnoColors(newColors); // Actualiza los colores en el estado
-      localStorage.setItem('alumnoColors', JSON.stringify(newColors)); // Guarda los colores en localStorage
       setTotalPages(response.data.totalPages);
       setLoading(false);
     } catch (err) {
       setError(messages[language]?.fetchError);
       setLoading(false);
     }
-  }, [language, currentPage, pageSize, debouncedQuery, filterBy, alumnoColors, assignRandomColor]);
+  }, [language, currentPage, pageSize, debouncedQuery, filterBy, assignRandomColor]);
 
   useEffect(() => {
     fetchAlumnos();
@@ -133,26 +189,34 @@ function AlumnoList() {
     return <div>{error}</div>;
   }
 
-  return (
-    <Box display="flex" flexDirection="column" alignItems="center" mt={4} mb={10}>
-      {/* Título de la lista de alumnos */}
-      <Typography className={styles.title} gutterBottom>
-        {messages[language]?.studentList}
-      </Typography>
+  // --- ESTILOS PAPER PRINCIPAL (igual que HomePage/Settings) ---
+  const mainPaperSx = {
+    m: { xs: 1.5, sm: 3, md: 4 },
+    borderRadius: 5,
+    boxShadow: theme.shadows[8],
+    background: theme.palette.background.paper,
+    border: `1.5px solid ${theme.palette.divider}`,
+    p: { xs: 2, sm: 3 },
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    transition: 'background-color 0.3s, color 0.3s, box-shadow 0.3s',
+    width: '100%',
+    maxWidth: 1200,
+    overflow: 'visible',
+    minHeight: 0,
+  };
 
-      <Paper
-        elevation={5}
-        sx={{
-          padding: 3,
-          maxWidth: 1200,
-          width: '95%', // Reduce el ancho para dejar márgenes laterales
-          margin: '0 auto', // Centra el Paper horizontalmente
-          marginBottom: 10, // Deja un margen inferior similar al de Charts.jsx
-        }}
-      >
+  return (
+    <Box display="flex" justifyContent="center" width="100%">
+      <Paper elevation={5} sx={mainPaperSx}>
+        {/* Título de la lista de alumnos */}
+        <Typography sx={styles.title(theme)} gutterBottom>
+          {messages[language]?.studentList}
+        </Typography>
         {/* Contenedor para los filtros */}
-        <Box className={styles.filtersContainer}>
-          <FormControl size="small" className={styles.filterFormControl}>
+        <Box sx={styles.filtersContainer(theme)}>
+          <FormControl size="small" sx={styles.filterFormControl}>
             <InputLabel>{messages[language]?.filterBy}</InputLabel>
             <Select
               value={filterBy}
@@ -167,20 +231,20 @@ function AlumnoList() {
 
           <TextField
             size="small"
-            className={styles.filterQueryInput}
+            sx={styles.filterQueryInput(theme)}
             placeholder={messages[language]?.search}
             value={query}
-            onChange={(e) => setQuery(e.target.value)} // Actualiza el estado query
+            onChange={(e) => setQuery(e.target.value)}
           />
 
           {/* Selector de tamaño de página */}
-          <FormControl size="small" className={styles.pageSizeSelector}>
+          <FormControl size="small" sx={styles.pageSizeSelector}>
             <InputLabel>{messages[language]?.pageSize}</InputLabel>
             <Select
               value={pageSize}
               onChange={(e) => {
-                setPageSize(Number(e.target.value)); // Actualizar el tamaño de página
-                setCurrentPage(1); // Reiniciar la página actual al cambiar el tamaño de página
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
               }}
               label={messages[language]?.pageSize}
             >
@@ -202,7 +266,7 @@ function AlumnoList() {
         />
 
         {/* Lista de alumnos */}
-        <Box className={styles.AlumnoList}>
+        <Box sx={styles.alumnoList(theme)}>
           {alumnos.map((alumno) => (
             <AlumnoLink key={alumno.idAlumno} alumnoData={alumno} backgroundColor={alumnoColors[alumno.idAlumno]} isLoggedIn={true} />
           ))}
