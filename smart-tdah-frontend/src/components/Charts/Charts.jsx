@@ -1,34 +1,46 @@
-import React, { memo } from "react";
+import React, { memo, useEffect, useState, useRef, useCallback } from "react";
 import { Box, Button, Checkbox, Container, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, TextField, Typography, useTheme } from "@mui/material";
-import { useEffect, useState, useRef, useCallback } from "react";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { enGB, es, ptBR } from "date-fns/locale"; // Importa los locales para los idiomas
+import { enGB, es, ptBR } from "date-fns/locale";
 import Chart from "./Chart";
 import TableStats from "../Table/TableStats";
 import messages from "../../utils/translations.json";
 import { useLanguage } from "../../hooks/LanguageContext";
 
-const styles = {
+// =====================
+// Estilos centralizados y documentados
+// =====================
+const styles = (theme) => ({
+  // --- Contenedor de filtros ---
   filtersContainer: {
-    display: 'flex',
+    display: 'flex', // Layout horizontal
     flexDirection: 'row',
     alignItems: 'center',
-    gap: { xs: 1, sm: 1.5 },
-    marginBlock: { xs: 1.5, sm: 2.5 },
-    marginInline: { xs: 0.5, sm: 1.25 },
-    flexWrap: 'wrap',
-    backgroundColor: (theme) => theme.palette.background.default,
-    borderRadius: 4,
-    boxShadow: (theme) => theme.shadows[2],
-    border: (theme) => `1.5px solid ${theme.palette.divider}`,
-    p: { xs: 1, sm: 1.5 },
-    m: { xs: 0.5, sm: 1 },
+    gap: theme.spacing(1.5), // Espacio entre filtros
+    marginBlock: theme.spacing(2.5), // Margen vertical
+    marginInline: theme.spacing(1.25), // Margen horizontal
+    flexWrap: 'wrap', // Permite salto de línea en móvil
+    backgroundColor: theme.palette.background.default, // Fondo según tema
+    borderRadius: 4, // Bordes redondeados
+    boxShadow: theme.shadows[2], // Sombra sutil
+    border: `1.5px solid ${theme.palette.divider}`,
+    p: theme.spacing(1.5), // Padding principal
+    m: theme.spacing(1), // Margen exterior
     transition: 'background-color 0.3s, color 0.3s, box-shadow 0.3s',
+    // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
+      gap: theme.spacing(1),
+      marginBlock: theme.spacing(1.5),
+      marginInline: theme.spacing(0.5),
+      p: theme.spacing(1),
+      m: theme.spacing(0.5),
+    },
   },
+  // --- Contenedor principal de la gráfica ---
   chartMainContainer: {
     width: '100%',
-    height: { xs: 320, sm: 500 },
+    height: 500, // Altura estándar
     position: 'relative',
     backgroundColor: 'transparent',
     boxShadow: 'none',
@@ -36,58 +48,82 @@ const styles = {
     border: 'none',
     p: 0,
     m: 0,
+    // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
+      height: 320, // Menor altura en móvil
+    },
   },
+  // --- Overlay para mensaje de no datos ---
   noDataOverlay: {
     position: 'absolute',
     left: '50%',
     top: '45%',
     transform: 'translate(-50%, -50%)',
   },
-  tableStatsTitle: (theme) => ({
-    fontWeight: 900,
-    fontSize: 20,
-    color: theme.palette.primary.main,
-    mb: 2,
-    mt: 2, // Añadido margen superior para separar el título de la gráfica
-    textAlign: 'center',
-    letterSpacing: 0.5,
+  // --- Título de la tabla de estadísticas ---
+  tableStatsTitle: {
+    fontWeight: 900, // Negrita
+    fontSize: 20, // Tamaño grande
+    color: theme.palette.primary.main, // Color principal
+    mb: 2, // Margen inferior
+    mt: 2, // Margen superior
+    textAlign: 'center', // Centrado
+    letterSpacing: 0.5, // Espaciado entre letras
     textShadow: theme.palette.mode === 'dark'
       ? '0 2px 8px rgba(0,0,0,0.18)'
       : '0 2px 8px rgba(0,0,0,0.08)',
-    textTransform: 'uppercase',
+    textTransform: 'uppercase', // Mayúsculas
     background: 'none',
     border: 'none',
     p: 0,
-  }),
+    // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
+      fontSize: 16,
+      mb: 1,
+      mt: 1,
+    },
+  },
+  // --- FormControl de filtro ---
   filterFormControl: {
-    minWidth: 150,
-    '@media (max-width:600px)': {
+    minWidth: 150, // Ancho mínimo
+    // --- Responsive para móvil ---
+    '@media (maxWidth:600px)': {
       minWidth: 110,
     },
   },
+  // --- Campo de fecha ---
   datePickerField: {
-    minWidth: 120,
-    mx: 0.5,
-    '@media (max-width:600px)': {
+    minWidth: 120, // Ancho mínimo
+    mx: 0.5, // Margen horizontal
+    // --- Responsive para móvil ---
+    '@media (maxWidth:600px)': {
       minWidth: 80,
     },
   },
+  // --- Wrapper de los campos de fecha ---
   datePickerWrapper: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: { xs: 1, sm: 1.5 },
+    gap: theme.spacing(1.5),
+    // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
+      gap: theme.spacing(1),
+    },
   },
+  // --- Checkbox de filtro por fecha ---
   filterByDateCheckbox: {
-    mx: 1,
+    mx: 1, // Margen horizontal
   },
-};
+});
 
-//El uso de memo es para evitar que el componente se vuelva a renderizar innecesariamente
-// Esto es útil si el componente recibe props que no cambian con frecuencia
+// =============================
+// Componente principal Charts
+// =============================
 const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
   const { language } = useLanguage();
   const theme = useTheme();
+  const sx = styles(theme); // Estilos centralizados
   const printRef = useRef();
   const [filters, setFilters] = useState({
     minDate: null,
@@ -98,7 +134,7 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
   const [filterByDates, setFilterByDates] = useState(false);
   const [filteredData, setFilteredData] = useState(filteredStats);
 
-  // Mapea el idioma seleccionado al locale correspondiente de date-fns
+  // --- Mapea el idioma seleccionado al locale correspondiente de date-fns ---
   const getLocale = () => {
     switch (language) {
       case "en":
@@ -112,42 +148,40 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
     }
   };
 
-  // Actualiza los datos filtrados según los filtros aplicados
+  // --- Actualiza los datos filtrados según los filtros aplicados ---
   const updateFilters = useCallback(() => {
     let aux = filteredStats;
-
     if (filterByDates) {
       if (filters.minDate !== null) {
         aux = aux.filter((item) => item.x >= filters.minDate);
       }
-
       if (filters.maxDate !== null) {
         aux = aux.filter((item) => item.x <= filters.maxDate);
       }
     }
-
     if (filters.dificultad !== "None") {
       aux = aux.filter((item) => item.dificultad === filters.dificultad);
     }
-
     if (filters.juego !== "None") {
       aux = aux.filter((item) => item.juego === filters.juego);
     }
-
     setFilteredData(aux);
   }, [filteredStats, filters, filterByDates]);
 
-  // Actualiza los datos filtrados cada vez que cambian los filtros o los datos originales
+  // --- Actualiza los datos filtrados cada vez que cambian los filtros o los datos originales ---
   useEffect(() => {
     updateFilters();
   }, [updateFilters]);
 
+  // =============================
+  // Renderizado visual del componente
+  // =============================
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={getLocale()}>
       <Container>
-        <Box sx={styles.filtersContainer}>
+        <Box sx={sx.filtersContainer}>
           {/* Filtro por dificultad */}
-          <FormControl size="small" sx={styles.filterFormControl}>
+          <FormControl size="small" sx={sx.filterFormControl}>
             <InputLabel size="small">{messages[language]?.difficulty}</InputLabel>
             <Select
               size="small"
@@ -163,7 +197,7 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
           </FormControl>
 
           {/* Filtro por juego */}
-          <FormControl size="small" sx={styles.filterFormControl}>
+          <FormControl size="small" sx={sx.filterFormControl}>
             <InputLabel size="small">{messages[language]?.game}</InputLabel>
             <Select
               size="small"
@@ -182,7 +216,7 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
           </FormControl>
 
           {/* Checkbox para activar el filtro de fechas */}
-          <FormGroup sx={styles.filterByDateCheckbox}>
+          <FormGroup sx={sx.filterByDateCheckbox}>
             <FormControlLabel
               control={<Checkbox checked={filterByDates} onChange={(e) => setFilterByDates(e.target.checked)} />}
               label={messages[language]?.filterByDate}
@@ -191,19 +225,19 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
 
           {/* Campos de selección de fecha (Desde y Hasta) */}
           {filterByDates && (
-            <Box sx={styles.datePickerWrapper}>
+            <Box sx={sx.datePickerWrapper}>
               <DatePicker
                 label={messages[language]?.from}
                 value={filters.minDate}
                 onChange={(newValue) => setFilters({ ...filters, minDate: newValue })}
                 maxDate={new Date()}
-                renderInput={(params) => <TextField {...params} size="small" sx={styles.datePickerField} />}
+                renderInput={(params) => <TextField {...params} size="small" sx={sx.datePickerField} />}
               />
               <DatePicker
                 label={messages[language]?.to}
                 value={filters.maxDate}
                 onChange={(newValue) => setFilters({ ...filters, maxDate: newValue })}
-                renderInput={(params) => <TextField {...params} size="small" sx={styles.datePickerField} />}
+                renderInput={(params) => <TextField {...params} size="small" sx={sx.datePickerField} />}
                 minDate={filters.minDate}
                 maxDate={new Date()}
               />
@@ -212,9 +246,9 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
         </Box>
 
         {/* Contenedor para la gráfica */}
-        <Box sx={styles.chartMainContainer} ref={printRef}>
+        <Box sx={sx.chartMainContainer} ref={printRef}>
           {filteredData.length === 0 && (
-            <Box sx={styles.noDataOverlay}>
+            <Box sx={sx.noDataOverlay}>
               <Button disabled>
                 <Typography variant={"h4"}>{messages[language]?.noData}</Typography>
               </Button>
@@ -224,7 +258,7 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
         </Box>
 
         {/* Contenedor para la tabla */}
-        <Typography sx={styles.tableStatsTitle(theme)}>
+        <Typography sx={sx.tableStatsTitle}>
           {messages[language]?.statsTable}
         </Typography>
         <TableStats stats={filteredData} getJuego={getJuego} getDificultad={getDificultad} />

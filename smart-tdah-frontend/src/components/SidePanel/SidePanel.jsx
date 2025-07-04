@@ -7,8 +7,11 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { useLanguage } from '../../hooks/LanguageContext';
 import messages from '../../utils/translations.json';
 
-// Migración de estilos SCSS a CSS-in-JS siguiendo buenas prácticas y modularidad
-const styles = {
+// =====================
+// Estilos centralizados
+// =====================
+// Todos los estilos visuales del componente están aquí agrupados y documentados.
+const styles = (theme) => ({
   sidePanel: {
     display: 'flex',
     flexDirection: 'column',
@@ -20,8 +23,16 @@ const styles = {
     zIndex: 999,
     pt: '10px', // padding-top
     pb: '10px', // padding-bottom
-    // Responsividad: en pantallas pequeñas, el panel puede ocultarse o cambiar de tamaño si se desea
-    '@media (max-width:600px)': {
+    // Estilos según el tema
+    backgroundColor: theme.palette.background.paper, // color de fondo dependiente del tema
+    color: theme.palette.text.primary, // color de texto dependiente del tema
+    border: `1.5px solid ${theme.palette.divider}`,
+    boxShadow: theme.shadows[8],
+    backdropFilter: 'blur(2px)',
+    transition: 'background-color 0.3s, color 0.3s',
+    // --- Responsive para móvil ---
+    '@media (maxWidth:600px)': {
+      height: 'calc(100% - 54px)',
       width: 48,
       pt: '6px',
       pb: '6px',
@@ -31,20 +42,21 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: 'white',
     width: 40,
     height: 'auto',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     fontSize: 12,
+    // Estilos según el tema
+    color: theme.palette.text.primary,
     '& span': {
       marginTop: 2,
       fontSize: 10,
-      color: 'white',
+      color: theme.palette.text.secondary,
     },
     '&:hover': {
-      color: 'primary.main',
+      color: theme.palette.primary.main,
     },
   },
   divider: {
@@ -52,6 +64,7 @@ const styles = {
     height: 2,
     my: 2.5, // marginY: 20px aprox
     alignSelf: 'center',
+    backgroundColor: theme.palette.divider,
   },
   settingsContainer: {
     display: 'flex',
@@ -59,64 +72,36 @@ const styles = {
     flexDirection: 'column',
     marginTop: 'auto',
   },
-};
+});
 
 const SidePanel = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const theme = useTheme(); // Acceso al tema actual (claro/oscuro)
-
-  // Estilos adaptados al tema actual
-  const themedStyles = {
-    ...styles,
-    sidePanel: {
-      ...styles.sidePanel,
-      backgroundColor: theme.palette.background.paper, 
-      color: theme.palette.text.primary,
-      border: `1.5px solid ${theme.palette.divider}`,
-      boxShadow: theme.shadows[8],
-      backdropFilter: 'blur(2px)',
-      transition: 'background-color 0.3s, color 0.3s',
-    },
-    button: {
-      ...styles.button,
-      color: theme.palette.text.primary,
-      '& span': {
-        ...styles.button['& span'],
-        color: theme.palette.text.secondary,
-      },
-      '&:hover': {
-        color: theme.palette.primary.main,
-      },
-    },
-    divider: {
-      ...styles.divider,
-      backgroundColor: theme.palette.divider,
-    },
-  };
+  const sx = styles(theme); // Obtenemos los estilos centralizados
 
   return (
-    <Toolbar sx={themedStyles.sidePanel}>
+    <Toolbar sx={sx.sidePanel}>
       {/* Botón de inicio en la parte superior */}
       <IconButton onClick={() => navigate('/')}>
-        <HomeIcon sx={themedStyles.button}/>
+        <HomeIcon sx={sx.button} />
         <span>{messages[language]?.home}</span>
       </IconButton>
 
       {/* separación */}
-      <Divider sx={themedStyles.divider} />
+      <Divider sx={sx.divider} />
 
       {/* Botón para la lista de alumnos */}
       <IconButton onClick={() => navigate('/alumnos')}>
-        <ListAltIcon sx={themedStyles.button}/>
+        <ListAltIcon sx={sx.button} />
         <span>{messages[language]?.students}</span>
       </IconButton>
 
       {/* separación y ajustes en la parte inferior */}
-      <div style={styles.settingsContainer}>
-        <Divider sx={themedStyles.divider} />
-        <IconButton onClick={() => navigate('/settings')} >
-          <SettingsIcon sx={themedStyles.button}/>
+      <div style={sx.settingsContainer}>
+        <Divider sx={sx.divider} />
+        <IconButton onClick={() => navigate('/settings')}>
+          <SettingsIcon sx={sx.button} />
           <span>{messages[language]?.settings}</span>
         </IconButton>
       </div>

@@ -20,55 +20,74 @@ const styles = {
   alumno: (theme) => ({
     display: 'flex', // Layout horizontal
     alignItems: 'center', // Centra verticalmente
-    width: '80%', // Ocupa el 80% del contenedor padre
-    minWidth: 320, // No se hace demasiado pequeño
-    maxWidth: '100%', // Nunca sobresale
-    minHeight: 48, // Altura mínima
+    width: '100%', // Ocupa todo el ancho del contenedor
+    minWidth: 0, // Permite reducirse en pantallas pequeñas
+    maxWidth: 800, // Máximo ancho en desktop/tablet
+    minHeight: 48, // Altura mínima para consistencia visual
     flexWrap: 'wrap', // Permite que el contenido baje si es necesario
     wordBreak: 'break-word', // Rompe palabras largas
     margin: '4px 0', // Espaciado vertical entre alumnos
     borderRadius: 2, // Bordes redondeados
-    padding: '6px 16px', // Espaciado interno
+    padding: '6px 16px', // Espaciado interno principal
     cursor: 'pointer', // Cursor de mano al pasar por encima
     transition: 'box-shadow 0.2s, background-color 0.2s', // Transiciones suaves
-    // Colores y bordes según el tema
-    backgroundColor: theme.palette.background.paper,
-    color: theme.palette.text.primary,
-    border: `1px solid ${theme.palette.divider}`,
-    boxShadow: theme.shadows[2],
-    // Efecto hover visual
+    backgroundColor: theme.palette.background.paper, // Fondo según tema
+    color: theme.palette.text.primary, // Texto según tema
+    border: `1px solid ${theme.palette.divider}`, // Borde según tema
+    boxShadow: theme.shadows[2], // Sombra sutil
     '&:hover': {
-      backgroundColor: theme.palette.action.hover,
-      boxShadow: theme.shadows[4],
+      backgroundColor: theme.palette.action.hover, // Fondo en hover
+      boxShadow: theme.shadows[4], // Sombra más marcada en hover
+    },
+    // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
+      maxWidth: '100%', // Ocupa todo el ancho en móvil
+      padding: '6px 4px', // Padding más compacto
+      fontSize: 14, // Fuente más pequeña
     },
   }),
   // --- Avatar del alumno (iniciales) ---
   profileImage: (theme, backgroundColor) => ({
-    width: 48, // Tamaño del avatar
-    height: 48,
-    fontSize: 22, // Tamaño de letra de las iniciales
-    marginRight: 2, // Separación a la derecha
-    // Colores dinámicos según el color de fondo recibido o el color primario del tema
-    bgcolor: backgroundColor || theme.palette.primary.main,
-    color: theme.palette.getContrastText(backgroundColor || theme.palette.primary.main),
+    width: 44, // Tamaño del avatar en desktop/tablet
+    height: 44,
+    fontSize: 20, // Tamaño de letra de las iniciales
+    marginRight: 8, // Separación a la derecha
+    bgcolor: backgroundColor || theme.palette.primary.main, // Color de fondo dinámico
+    color: theme.palette.getContrastText(backgroundColor || theme.palette.primary.main), // Contraste de texto
+    // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
+      width: 36, // Avatar más pequeño
+      height: 36,
+      fontSize: 16, // Letra más pequeña
+      marginRight: 6, // Menos margen
+    },
   }),
   // --- Nombre y apellidos ---
   alumnoName: (theme) => ({
-    display: 'flex',
-    alignItems: 'center',
+    display: 'flex', // Layout horizontal
+    alignItems: 'center', // Centra verticalmente
     gap: 1, // Espacio entre icono y texto
     fontWeight: 'bold', // Negrita
-    fontSize: 18, // Tamaño grande
+    fontSize: 18, // Tamaño grande en desktop/tablet
     mb: 0.5, // Margen inferior
-    color: theme.palette.text.primary,
+    color: theme.palette.text.primary, // Color según tema
+    // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
+      fontSize: 15, // Fuente más pequeña
+    },
   }),
   // --- Curso y email ---
   alumnoCursoEmail: (theme) => ({
-    display: 'flex',
-    alignItems: 'center',
+    display: 'flex', // Layout horizontal
+    alignItems: 'center', // Centra verticalmente
     gap: 1, // Espacio entre iconos y texto
-    fontSize: 14, // Más pequeño
-    color: theme.palette.text.secondary,
+    fontSize: 14, // Tamaño estándar en desktop/tablet
+    color: theme.palette.text.secondary, // Color secundario
+    flexWrap: 'wrap', // Permite salto de línea si es necesario
+    // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
+      fontSize: 12, // Fuente más pequeña
+    },
   }),
 };
 

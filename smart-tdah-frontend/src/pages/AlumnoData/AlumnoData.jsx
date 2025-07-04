@@ -1,3 +1,4 @@
+
 import { useParams, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
@@ -13,12 +14,104 @@ import EmailIcon from '@mui/icons-material/Email';
 import SchoolIcon from '@mui/icons-material/School';
 import WcIcon from '@mui/icons-material/Wc';
 
+// =====================
+// Estilos centralizados y documentados para AlumnoData
+// =====================
+// Todos los estilos visuales se agrupan en una constante styles.
+// Cada línea lleva un comentario claro y contextual.
+const styles = (theme) => ({
+  // Contenedor principal de la página
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    minHeight: '100vh',
+    position: 'relative',
+    width: '100%',
+  },
+  // Botón de descarga, fijo en la esquina superior derecha
+  downloadBtnBox: {
+    position: 'fixed',
+    top: { xs: 72, sm: 80 }, // Debajo del Banner
+    right: { xs: 12, sm: 32 },
+    zIndex: 1201, // Por encima del Paper
+  },
+  // Paper principal: márgenes responsivos, sombra, fondo, bordes
+  mainPaper: {
+    mx: { xs: 1.5, sm: 3, md: 4 },
+    my: { xs: 1.5, sm: 3, md: 4 },
+    borderRadius: 5,
+    boxShadow: theme.shadows[8],
+    background: theme.palette.background.paper,
+    border: `1.5px solid ${theme.palette.divider}`,
+    p: { xs: 2, sm: 3 },
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    transition: 'background-color 0.3s, color 0.3s, box-shadow 0.3s',
+    width: '100%',
+    maxWidth: 1200,
+    overflow: 'visible',
+    minHeight: 0,
+    boxSizing: 'border-box',
+  },
+  // Contenedor de la info del alumno
+  alumnoInfo: {
+    textAlign: 'center',
+    px: { xs: 2, sm: 4 },
+    py: { xs: 2, sm: 3 },
+    mb: 2,
+    borderRadius: 4,
+    background: theme.palette.background.default,
+    boxShadow: theme.shadows[2],
+    border: `1.5px solid ${theme.palette.divider}`,
+    transition: 'background-color 0.3s, color 0.3s, box-shadow 0.3s',
+    maxWidth: 600,
+    mx: 'auto',
+  },
+  // Nombre del alumno
+  alumnoName: {
+    fontSize: { xs: '1.5rem', sm: '1.8rem' },
+    fontWeight: 'bold',
+    mb: 1.25,
+    color: theme.palette.primary.main,
+    letterSpacing: 0.5,
+    textShadow: theme.palette.mode === 'dark'
+      ? '0 2px 8px rgba(0,0,0,0.18)'
+      : '0 2px 8px rgba(0,0,0,0.08)',
+    transition: 'color 0.3s, text-shadow 0.3s',
+  },
+  // Detalles del alumno (alineados a la izquierda, con iconos)
+  alumnoDetails: {
+    fontSize: { xs: '1rem', sm: '1.1rem' },
+    my: 0.6,
+    color: theme.palette.text.secondary,
+    transition: 'color 0.3s',
+    textAlign: 'left',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1.2,
+  },
+  // Loader y errores
+  loaderBox: {
+    mt: 4,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  errorBox: {
+    mt: 4,
+    width: '100%',
+    maxWidth: 600,
+  },
+});
+
 function AlumnoData({ isLoggedIn }) {
   const { id_alumno } = useParams();
   const [filteredStats, setFilteredStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const theme = useTheme();
+  const sx = styles(theme); // estilos centralizados
   const { language } = useLanguage();
   const statsRef = useRef();
 
@@ -138,117 +231,47 @@ function AlumnoData({ isLoggedIn }) {
     }
   };
 
-  // --- ESTILOS CSS-in-JS ---
-  // Contenedor principal de la info del alumno
-  const alumnoInfoContainerSx = {
-    textAlign: 'center',
-    px: { xs: 2, sm: 4 },
-    py: { xs: 2, sm: 3 },
-    mb: 2,
-    borderRadius: 4,
-    background: theme.palette.background.default,
-    boxShadow: theme.shadows[2],
-    border: `1.5px solid ${theme.palette.divider}`,
-    transition: 'background-color 0.3s, color 0.3s, box-shadow 0.3s',
-    maxWidth: 600,
-    mx: 'auto',
-  };
-  // Nombre del alumno
-  const alumnoNameSx = {
-    fontSize: { xs: '1.5rem', sm: '1.8rem' },
-    fontWeight: 'bold',
-    mb: 1.25,
-    color: theme.palette.primary.main,
-    letterSpacing: 0.5,
-    textShadow: theme.palette.mode === 'dark'
-      ? '0 2px 8px rgba(0,0,0,0.18)'
-      : '0 2px 8px rgba(0,0,0,0.08)',
-    transition: 'color 0.3s, text-shadow 0.3s',
-  };
-  // Detalles del alumno (alineados a la izquierda, con iconos)
-  const alumnoDetailsSx = {
-    fontSize: { xs: '1rem', sm: '1.1rem' },
-    my: 0.6,
-    color: theme.palette.text.secondary,
-    transition: 'color 0.3s',
-    textAlign: 'left', // Alineación a la izquierda
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1.2,
-  };
-
-  // --- ESTILOS PAPER PRINCIPAL (idéntico a AlumnoList, márgenes responsivos SIEMPRE visibles) ---
-  const mainPaperSx = {
-    mx: { xs: 1.5, sm: 3, md: 4 }, // margen horizontal siempre presente
-    my: { xs: 1.5, sm: 3, md: 4 }, // margen vertical siempre presente
-    borderRadius: 5,
-    boxShadow: theme.shadows[8],
-    background: theme.palette.background.paper,
-    border: `1.5px solid ${theme.palette.divider}`,
-    p: { xs: 2, sm: 3 },
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    transition: 'background-color 0.3s, color 0.3s, box-shadow 0.3s',
-    width: '100%',
-    maxWidth: 1200,
-    overflow: 'visible',
-    minHeight: 0,
-    boxSizing: 'border-box', // asegura que el padding y border no rompan el layout
-  };
-
   // Layout principal
   return isLoggedIn ? (
-    <Box display="flex" flexDirection="column" alignItems="center" minHeight="100vh" position="relative" width="100%">
+    <Box sx={sx.root}>
       {/* Botón para descargar el informe, fijo en la esquina superior derecha */}
-      <Box
-        sx={{
-          position: 'fixed',
-          top: { xs: 72, sm: 80 }, // Debajo del Banner
-          right: { xs: 12, sm: 32 },
-          zIndex: 1201, // Por encima del Paper
-        }}
-      >
+      <Box sx={sx.downloadBtnBox}>
         <Button variant="contained" color="primary" onClick={handleDownloadReport}>
           {messages[language]?.downloadReport}
         </Button>
       </Box>
-      {/* Contenedor para la información del alumno */}
-      <Paper
-        ref={statsRef}
-        elevation={5}
-        sx={mainPaperSx}
-      >
-        <Box sx={alumnoInfoContainerSx}>
-          <Typography sx={alumnoNameSx} component="h1">
+      {/* Contenedor para la información del alumno y las gráficas */}
+      <Paper ref={statsRef} elevation={5} sx={sx.mainPaper}>
+        <Box sx={sx.alumnoInfo}>
+          <Typography sx={sx.alumnoName} component="h1">
             {filteredStats[0]?.nombre} {filteredStats[0]?.apellidos}
           </Typography>
-          <Typography sx={alumnoDetailsSx} component="p">
+          <Typography sx={sx.alumnoDetails} component="p">
             <EmailIcon fontSize="small" sx={{ mr: 1, color: theme.palette.primary.main }} />
             <strong>{messages[language]?.email}:</strong> {filteredStats[0]?.email}
           </Typography>
-          <Typography sx={alumnoDetailsSx} component="p">
+          <Typography sx={sx.alumnoDetails} component="p">
             <SchoolIcon fontSize="small" sx={{ mr: 1, color: theme.palette.primary.main }} />
             <strong>{messages[language]?.course}:</strong> {filteredStats[0]?.curso}
           </Typography>
-          <Typography sx={alumnoDetailsSx} component="p">
+          <Typography sx={sx.alumnoDetails} component="p">
             <WcIcon fontSize="small" sx={{ mr: 1, color: theme.palette.primary.main }} />
             <strong>{messages[language]?.gender}:</strong> {filteredStats[0]?.genero || '-'}
           </Typography>
         </Box>
         {/* Contenedor para las gráficas */}
-          <Charts
-            filteredStats={filteredStatsMemo}
-            getJuego={getJuego}
-            getDificultad={getDificultad}
-          />
+        <Charts
+          filteredStats={filteredStatsMemo}
+          getJuego={getJuego}
+          getDificultad={getDificultad}
+        />
       </Paper>
       {/* Loader y errores */}
       {loading && (
-        <Box mt={4} display="flex" justifyContent="center"><CircularProgress /></Box>
+        <Box sx={sx.loaderBox}><CircularProgress /></Box>
       )}
       {error && (
-        <Box mt={4} width="100%" maxWidth={600}><Alert severity="error">{error}</Alert></Box>
+        <Box sx={sx.errorBox}><Alert severity="error">{error}</Alert></Box>
       )}
     </Box>
   ) : (

@@ -8,8 +8,21 @@ const pool = require('./dbConfig');
 require('dotenv').config(); // Cargar variables de entorno desde .env 
 
 const app = express();
-const PORT = process.env.SERVER_PORT; // Puerto del servidor
-const JWT_SECRET = process.env.JWT_SECRET; // Clave secreta para firmar los tokens JWT
+
+// ===============================
+// Cargar la clave secreta JWT desde variables de entorno
+// ===============================
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET no está definido en el entorno. Añádelo a tu archivo .env');
+}
+
+// ===============================
+// Configuración del host y puerto de escucha
+// Lee siempre de variables de entorno para alternar entre localhost y red local
+// ===============================
+const HOST = process.env.HOST || "localhost"; // Cambia HOST en .env para alternar
+const PORT = process.env.SERVER_PORT || 5000;
 
 app.use(cors()); // Usa el middleware cors
 app.use(bodyParser.json());
@@ -174,20 +187,25 @@ app.get('/profile', checkToken, async (req, res) => { //req: request, res: respo
 // Ruta de registro de un nuevo usuario (profesor)
 app.post('/signup', async (req, res) => { //req: request, res: response
   const { email, nombre, apellidos, password } = req.body; // Obtener las credenciales del cuerpo de la solicitud
-  const hashedPassword = await bcrypt.hash(password, 10); // Generar un hash de la contraseña
-
-  try { // Intentar registrar al nuevo profesor en la base de datos
+  try {
     const client = await pool.connect(); // Obtener un cliente del pool de conexiones
-    const result = await client.query( // Ejecutar una consulta para insertar al nuevo profesor en la base de datos
-      // [IMPLEMENTAR] asignar un id al profesor
+    // Comprobar si el email ya existe
+    const exists = await client.query('SELECT 1 FROM profesores WHERE email = $1', [email]);
+    if (exists.rows.length > 0) {
+      client.release();
+      return res.status(409).json({ error: 'Email already exists' }); // Error específico para frontend
+    }
+    // Generar hash solo si el email no existe
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await client.query(
       'INSERT INTO profesores (email, nombre, apellidos, password) VALUES ($1, $2, $3, $4) RETURNING id_profesor',
       [email, nombre, apellidos, hashedPassword]
     );
     client.release();
-    return res.status(201).json({ userId: result.rows[0].id }); // Enviar el id del nuevo profesor en la respuesta
-  } catch (err) { // Manejar errores
+    return res.status(201).json({ userId: result.rows[0].id_profesor });
+  } catch (err) {
     console.error(err);
-    return res.status(500).send('Error registering new user'); // Enviar un mensaje de error de registro de nuevo usuario
+    return res.status(500).json({ error: 'Error registering new user' });
   }
 });
 
@@ -258,6 +276,6 @@ app.post('/change-password', checkToken, async (req, res) => {
 // ############################################################################################################################
 
 // Iniciar el servidor
-app.listen(PORT, process.env.HOST || '0.0.0.0', () => { // Iniciar el servidor en el puerto PORT y en todas las interfaces
-  console.log(`Server running on http://${process.env.HOST || '0.0.0.0'}:${PORT}`); // Imprimir un mensaje en la consola
+app.listen(PORT, HOST, () => {
+  console.log(`Servidor escuchando en http://${HOST}:${PORT}`);
 });

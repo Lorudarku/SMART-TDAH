@@ -1,24 +1,33 @@
 import { useState, useEffect } from 'react';
 
+// =====================
+// Hook personalizado: useDebounce
+// =====================
+
 /**
- * Hook personalizado para aplicar debounce a un valor.
- * @param {any} value - Valor que será debounced.
- * @param {number} delay - Tiempo de espera en milisegundos.
- * @returns {any} - Valor debounced.
+ * useDebounce
+ * Retorna un valor debounced tras un retardo especificado.
+ * @param {any} value - Valor a debounciar.
+ * @param {number} delay - Tiempo de espera en ms antes de actualizar el valor.
+ * @returns {any} Valor debounced.
  */
 function useDebounce(value, delay) {
+  // Estado local: almacena el valor debounced
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
+    // Inicia un timeout para actualizar el valor debounced tras el delay
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
+    // Limpia el timeout si value o delay cambian antes de que termine
     return () => {
-      clearTimeout(handler); // Limpia el timeout si el valor cambia antes de que se complete el delay
+      clearTimeout(handler);
     };
   }, [value, delay]);
 
+  // Devuelve el valor debounced
   return debouncedValue;
 }
 
