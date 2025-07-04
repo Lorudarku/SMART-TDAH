@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, createContext, useMemo, useEffect } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
@@ -18,6 +17,7 @@ import Box from '@mui/material/Box'; // Asegura que Box esté importado
 // Creamos el contexto para compartir el modo oscuro/claro entre componentes
 export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
+
 function App() {
   const [mode, setMode] = useState(() => {
     // Carga el tema desde localStorage o usa "light" como predeterminado
@@ -25,15 +25,23 @@ function App() {
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado de autenticación
 
+  // Borra credenciales y fuerza login en cualquier recarga (F5 o Ctrl+F5)
   useEffect(() => {
-    // Verifica si el token existe en localStorage al cargar la aplicación
-    const token = localStorage.getItem("token");
-    if (token) {
-      setIsLoggedIn(true); // Si el token existe, establece el estado como autenticado
-    } else {
-      setIsLoggedIn(false); // Si no hay token, establece el estado como no autenticado
+    // Si hay token, lo eliminamos y forzamos logout en el próximo mount
+    if (localStorage.getItem('token')) {
+      localStorage.removeItem('token');
+      setIsLoggedIn(false);
+      // Redirige a /login tras el reload (se hace en el siguiente mount)
     }
-  }, []); // Solo se ejecuta al cargar la aplicación
+  }, []);
+
+  useEffect(() => {
+    // Siempre fuerza logout y redirige a login tras cualquier recarga
+    setIsLoggedIn(false);
+    if (window.location.pathname !== '/login') {
+      window.location.replace('/login');
+    }
+  }, []);
 
   const colorMode = useMemo(
     () => ({

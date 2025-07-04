@@ -211,7 +211,17 @@ return (
         {error && <Typography sx={sx.error}>{error}</Typography>}
         <Typography variant="body2" sx={sx.signupText}>
           {messages[language]?.noAccount}{' '}
-          <Link href="#" onClick={() => navigate('/signup')}>
+          {/* Al hacer click en "Registrarse", limpia los campos y errores antes de navegar */}
+          <Link
+            component="button"
+            underline="always"
+            onClick={() => {
+              setEmail('');
+              setPassword('');
+              setError('');
+              navigate('/signup');
+            }}
+          >
             {messages[language]?.signUp}
           </Link>
         </Typography>

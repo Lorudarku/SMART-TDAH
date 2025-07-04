@@ -67,6 +67,32 @@ const Chart = ({ filteredStats }) => {
   };
 
   // --- Tooltip personalizado con estilos centralizados ---
+  // Traducción de dificultad y juego para el tooltip
+  const translateDificultad = (dif) => {
+    if (!dif) return "-";
+    switch (dif) {
+      case "Fácil": return messages[language]?.easy;
+      case "Normal": return messages[language]?.normal;
+      case "Difícil": return messages[language]?.hard;
+      case "Easy": return messages[language]?.easy;
+      case "Hard": return messages[language]?.hard;
+      default: return messages[language]?.[dif] || dif;
+    }
+  };
+
+  const translateJuego = (juego) => {
+    if (!juego) return "-";
+    switch (juego) {
+      case "ejercicioLetras": return messages[language]?.letterExercise;
+      case "ejercicioDesplazamiento": return messages[language]?.displacementExercise;
+      case "operacionesMatematicas": return messages[language]?.mathOperations;
+      case "memoriseNumber": return messages[language]?.memorizeNumbers;
+      case "matchFigures": return messages[language]?.matchFigures;
+      case "ejercicioNumerosIguales": return messages[language]?.equalNumbersExercise;
+      default: return juego;
+    }
+  };
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -75,10 +101,10 @@ const Chart = ({ filteredStats }) => {
             {messages[language]?.startDate}: {format(label, "HH:mm dd/MM/yyyy")}
           </Typography>
           <Typography gutterBottom>
-            {messages[language]?.difficulty}: {payload[0]?.payload?.dificultad || "-"}
+            {messages[language]?.difficulty}: {translateDificultad(payload[0]?.payload?.dificultad)}
           </Typography>
           <Typography gutterBottom>
-            {messages[language]?.game}: {payload[0]?.payload?.juego || "-"}
+            {messages[language]?.game}: {translateJuego(payload[0]?.payload?.juego)}
           </Typography>
           <Typography gutterBottom>
             {messages[language]?.corrects}: {payload[0]?.value}

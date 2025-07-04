@@ -3,6 +3,7 @@ import { Box, Button, Checkbox, Container, FormControl, FormControlLabel, FormGr
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { enGB, es, ptBR } from "date-fns/locale";
+import gal from '../../utils/date-fns-locale-gl';
 import Chart from "./Chart";
 import TableStats from "../Table/TableStats";
 import messages from "../../utils/translations.json";
@@ -135,12 +136,15 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
   const [filteredData, setFilteredData] = useState(filteredStats);
 
   // --- Mapea el idioma seleccionado al locale correspondiente de date-fns ---
+  // Devuelve el locale adecuado para el selector de fechas según el idioma
   const getLocale = () => {
     switch (language) {
       case "en":
         return enGB;
       case "es":
         return es;
+      case "gal":
+        return gal;
       case "pt":
         return ptBR;
       default:

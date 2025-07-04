@@ -14,6 +14,7 @@ import logo from '../../assets/favicon.ico';
 import flagEn from '../../assets/english.png';
 import flagEs from '../../assets/spanish.png';
 import flagPt from '../../assets/brazilian.png';
+import flagGal from '../../assets/galician.png';
 
 // =====================
 // Estilos centralizados
@@ -92,17 +93,17 @@ const styles = {
     textOverflow: 'ellipsis', // Muestra '...'
     maxWidth: 'calc(100vw - 480px)', // Ajuste más preciso: deja espacio para logo y botones
     minWidth: 0, // Permite recorte
-    transition: 'max-width 0.2s', // Transición suave
+    transition: 'maxWidth 0.2s', // Transición suave
     // --- Responsive para tablet y móvil ---
-    '@media (max-width:900px)': {
+    '@media (maxWidth:900px)': {
       fontSize: '38px',
       maxWidth: 'calc(100vw - 340px)', // Ajuste para tablet
     },
-    '@media (max-width:750px)': {
+    '@media (maxWidth:750px)': {
       fontSize: '28px',
       maxWidth: 'calc(100vw - 220px)', // Transición hacia pantallas pequeñas
     },
-    '@media (max-width:600px)': {
+    '@media (maxWidth:600px)': {
       maxWidth: 'calc(100vw - 110px)', // Ajuste para móvil
     },
   },
@@ -145,6 +146,7 @@ const styles = {
 const flagMap = {
   en: flagEn,
   es: flagEs,
+  gal: flagGal,
   pt: flagPt,
 };
 
@@ -176,7 +178,7 @@ function Banner({ setIsLoggedIn }) {
 
   // --- Cierra sesión y redirige al login ---
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('token'); // Elimina el token real de autenticación
     setIsLoggedIn(false);
     navigate('/login');
   };
@@ -191,7 +193,19 @@ function Banner({ setIsLoggedIn }) {
       disableGutters
     >
       {/* Logo y título agrupados, clicable para volver al inicio */}
-      <Box sx={styles.logoTitleContainer} onClick={() => navigate('/')}> 
+      <Box
+        sx={styles.logoTitleContainer}
+        onClick={() => {
+          // Si el usuario está logeado, navega al home, si no, navega al login
+          const token = localStorage.getItem('token');
+          if (token) {
+            navigate('/');
+          } else {
+            setIsLoggedIn(false); // fuerza el estado a no autenticado
+            navigate('/login');
+          }
+        }}
+      >
         <img src={logo} alt="Logo" style={styles.logo} />
         <Typography sx={styles.title}>
           SMART-TDAH
@@ -228,7 +242,7 @@ function Banner({ setIsLoggedIn }) {
             <MenuItem key={lang} onClick={() => handleLanguageChange(lang)}>
               <Box display="flex" alignItems="center">
                 <img src={flag} alt={lang} style={styles.menuFlagImg} />
-                {lang === 'en' ? 'English' : lang === 'es' ? 'Español' : 'Português'}
+                {lang === 'en' ? 'English' : lang === 'es' ? 'Español' : lang === 'gal' ? 'Galego' : 'Português'}
               </Box>
             </MenuItem>
           ))}

@@ -91,6 +91,7 @@ const styles = (theme) => ({
   },
 });
 
+
 const ChangePasswordForm = ({ messages, language }) => {
   // --- Estados del formulario ---
   const [currentPassword, setCurrentPassword] = useState('');
@@ -98,18 +99,40 @@ const ChangePasswordForm = ({ messages, language }) => {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({}); // Errores individuales por campo
   const theme = useTheme();
   const sx = styles(theme); // Obtenemos los estilos centralizados
+
+  // --- Validación de campos (igual que en registro) ---
+  const validateFields = () => {
+    const errors = {};
+    // Contraseña actual obligatoria
+    if (!currentPassword) {
+      errors.currentPassword = messages[language]?.requiredCurrentPassword || messages[language]?.requiredField || 'Campo obligatorio';
+    }
+    // Nueva contraseña: mínimo 8 caracteres, una mayúscula, una minúscula, un número
+    if (!newPassword) {
+      errors.newPassword = messages[language]?.requiredNewPassword || messages[language]?.requiredField || 'Campo obligatorio';
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(newPassword)) {
+      errors.newPassword = messages[language]?.weakPassword || 'Mínimo 8 caracteres, mayúscula, minúscula y número';
+    }
+    // Confirmación obligatoria y debe coincidir
+    if (!confirmNewPassword) {
+      errors.confirmNewPassword = messages[language]?.requiredConfirmPassword || messages[language]?.requiredField || 'Campo obligatorio';
+    } else if (newPassword !== confirmNewPassword) {
+      errors.confirmNewPassword = messages[language]?.passwordMismatch || 'Las contraseñas no coinciden';
+    }
+    return errors;
+  };
 
   // --- Lógica de cambio de contraseña ---
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (newPassword !== confirmNewPassword) {
-      setError(messages[language]?.passwordMismatch);
-      return;
-    }
+    const errors = validateFields();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
     try {
       const token = localStorage.getItem('token');
       await axios.post(
@@ -125,6 +148,7 @@ const ChangePasswordForm = ({ messages, language }) => {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
+      setFieldErrors({});
     } catch (err) {
       setError(messages[language]?.passwordChangeError);
     }
@@ -147,6 +171,8 @@ const ChangePasswordForm = ({ messages, language }) => {
         value={currentPassword}
         onChange={(e) => setCurrentPassword(e.target.value)}
         sx={sx.textField}
+        error={!!fieldErrors.currentPassword}
+        helperText={fieldErrors.currentPassword}
       />
       <TextField
         label={messages[language]?.newPassword}
@@ -157,6 +183,8 @@ const ChangePasswordForm = ({ messages, language }) => {
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
         sx={sx.textField}
+        error={!!fieldErrors.newPassword}
+        helperText={fieldErrors.newPassword}
       />
       <TextField
         label={messages[language]?.confirmNewPassword}
@@ -167,6 +195,8 @@ const ChangePasswordForm = ({ messages, language }) => {
         value={confirmNewPassword}
         onChange={(e) => setConfirmNewPassword(e.target.value)}
         sx={sx.textField}
+        error={!!fieldErrors.confirmNewPassword}
+        helperText={fieldErrors.confirmNewPassword}
       />
       {error && <Typography sx={sx.error}>{error}</Typography>}
       {success && <Typography sx={sx.success}>{success}</Typography>}
