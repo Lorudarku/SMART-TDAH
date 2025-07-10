@@ -255,7 +255,6 @@ function Banner({ setIsLoggedIn }) {
 
         {/* Switch para modo claro/oscuro */}
         <Switch
-          className={styles.switch}
           checked={isDarkMode}
           onChange={colorMode.toggleColorMode}
           icon={<WbSunny style={{ color: "orange", position: "relative", top: "-1px" }} />} 
