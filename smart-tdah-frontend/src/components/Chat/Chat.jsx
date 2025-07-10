@@ -2,15 +2,18 @@
 import React, { useState } from 'react';
 import { Box, IconButton, TextField, Typography, Paper } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import { useLanguage } from '../../hooks/LanguageContext';
+import messages from '../../utils/translations.json';
 
 const Chat = () => {
-  const [messages, setMessages] = useState([]); // Lista de mensajes
-  const [input, setInput] = useState('');       // Estado para el mensaje de entrada
+  const [messagesList, setMessagesList] = useState([]); // Lista de mensajes
+  const [input, setInput] = useState(''); // Estado para el mensaje de entrada
+  const { language } = useLanguage();
 
   // Maneja el envío de mensajes
   const handleSendMessage = () => {
     if (input.trim()) {
-      setMessages([...messages, { text: input, sender: 'user' }]);
+      setMessagesList([...messagesList, { text: input, sender: 'user' }]);
       setInput('');
     }
   };
@@ -32,12 +35,12 @@ const Chat = () => {
     >
       {/* Título del chat */}
       <Box sx={{ bgcolor: 'primary.main', color: 'white', p: 2 }}>
-        <Typography variant="h6">Chat</Typography>
+        <Typography variant="h6">{messages[language]?.chatTitle}</Typography>
       </Box>
 
       {/* Área de mensajes */}
       <Box sx={{ p: 2, flex: 1, overflowY: 'auto', bgcolor: 'background.paper' }}>
-        {messages.map((msg, index) => (
+        {messagesList.map((msg, index) => (
           <Box
             key={index}
             sx={{
@@ -45,18 +48,18 @@ const Chat = () => {
               mb: 1,
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                display: 'inline-block',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 1,
-                bgcolor: msg.sender === 'user' ? 'primary.light' : 'grey.300',
-              }}
-            >
-              {msg.text}
-            </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  display: 'inline-block',
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 1,
+                  bgcolor: msg.sender === 'user' ? 'primary.light' : 'grey.300',
+                }}
+              >
+                {msg.text}
+              </Typography>
           </Box>
         ))}
       </Box>
@@ -67,7 +70,7 @@ const Chat = () => {
           fullWidth
           variant="outlined"
           size="small"
-          placeholder="Escribe un mensaje..."
+          placeholder={messages[language]?.chatPlaceholder}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
