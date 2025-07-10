@@ -5,7 +5,7 @@
 // Todos los estilos están centralizados en la constante styles.
 
 import React, { useContext, useState } from 'react';
-import { Toolbar, Typography, Switch, IconButton, Menu, MenuItem, Divider, Box } from '@mui/material';
+import { Toolbar, Typography, Switch, IconButton, Menu, MenuItem, Divider, Box, useTheme } from '@mui/material';
 import { WbSunny, NightlightRound, Language, Logout } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { ColorModeContext } from '../../App';
@@ -20,7 +20,11 @@ import flagGal from '../../assets/galician.png';
 // Estilos centralizados
 // =====================
 // Todos los estilos visuales del componente están aquí agrupados y documentados.
-const styles = {
+// =====================
+// Estilos centralizados con breakpoints MUI
+// =====================
+// Todos los estilos visuales del componente están aquí agrupados y documentados.
+const styles = (theme) => ({
   // --- Toolbar principal del banner ---
   toolbar: {
     backgroundColor: '#047acf', // Color de fondo principal
@@ -36,8 +40,8 @@ const styles = {
     whiteSpace: 'nowrap', // Evita saltos de línea
     boxSizing: 'border-box', // Padding incluido en el ancho
     // --- Responsive para móvil ---
-    '@media (maxWidth:600px)': {
-      height: '54px', // Menor altura en móvil
+    [theme.breakpoints.down('sm')]: {
+      height: '54px',
       paddingLeft: '2px',
       paddingRight: '2px',
     },
@@ -55,8 +59,7 @@ const styles = {
     marginRight: 10, // Espacio a la derecha
     width: 36, // Tamaño fijo
     height: 36,
-    // --- Responsive para móvil ---
-    '@media (maxWidth:600px)': {
+    [theme.breakpoints.down('sm')]: {
       width: 28,
       height: 28,
       marginRight: 6,
@@ -76,8 +79,7 @@ const styles = {
     height: '40px', // Alto línea
     backgroundColor: 'white',
     margin: '0px 10px',
-    // --- Responsive para móvil ---
-    '@media (maxWidth:600px)': {
+    [theme.breakpoints.down('sm')]: {
       height: '28px',
       margin: '0px 4px',
     },
@@ -89,22 +91,22 @@ const styles = {
     textDecoration: 'none',
     color: 'white',
     whiteSpace: 'nowrap', // No saltar línea
-    overflow: 'hidden', // Recorta si no cabe
-    textOverflow: 'ellipsis', // Muestra '...'
+    // overflow: 'hidden', // Recorta si no cabe
+    // textOverflow: 'ellipsis', // Muestra '...'
     maxWidth: 'calc(100vw - 480px)', // Ajuste más preciso: deja espacio para logo y botones
     minWidth: 0, // Permite recorte
     transition: 'maxWidth 0.2s', // Transición suave
     // --- Responsive para tablet y móvil ---
-    '@media (maxWidth:900px)': {
+    [theme.breakpoints.down('md')]: {
       fontSize: '38px',
       maxWidth: 'calc(100vw - 340px)', // Ajuste para tablet
     },
-    '@media (maxWidth:750px)': {
+    [theme.breakpoints.down(750)]: {
       fontSize: '28px',
       maxWidth: 'calc(100vw - 220px)', // Transición hacia pantallas pequeñas
     },
-    '@media (maxWidth:600px)': {
-      maxWidth: 'calc(100vw - 110px)', // Ajuste para móvil
+    [theme.breakpoints.down('sm')]: {
+      maxWidth: 'calc(100vw - 110px)',
     },
   },
   // --- Contenedor bandera + idioma ---
@@ -113,8 +115,8 @@ const styles = {
     alignItems: 'center',
     fontSize: 15,
     marginLeft: 0.5,
-    // --- Responsive para móvil ---
-    '@media (maxWidth:600px)': {
+  // --- Responsive para móvil ---
+    [theme.breakpoints.down('sm')]: {
       fontSize: 12,
     },
   },
@@ -123,7 +125,7 @@ const styles = {
     width: 15,
     marginRight: 3,
     // --- Responsive para móvil ---
-    '@media (maxWidth:600px)': {
+    [theme.breakpoints.down('sm')]: {
       width: 12,
       marginRight: 2,
     },
@@ -133,12 +135,12 @@ const styles = {
     width: 20,
     marginRight: 8,
     // --- Responsive para móvil ---
-    '@media (maxWidth:600px)': {
+    [theme.breakpoints.down('sm')]: {
       width: 15,
       marginRight: 4,
     },
   },
-};
+});
 
 // =====================
 // Mapa de banderas por idioma
@@ -153,11 +155,14 @@ const flagMap = {
 // =============================
 // Componente principal Banner
 // =============================
+
 function Banner({ setIsLoggedIn }) {
   // --- Contextos globales de color y navegación ---
   const colorMode = useContext(ColorModeContext); // Contexto para modo claro/oscuro
   const isDarkMode = colorMode.mode === 'dark'; // Estado actual del modo
   const navigate = useNavigate(); // Hook de navegación de React Router
+  const theme = useTheme(); // Hook de MUI para obtener el theme
+  const sx = styles(theme);
 
   // --- Contexto de idioma ---
   const { changeLanguage, language } = useLanguage();
@@ -189,12 +194,12 @@ function Banner({ setIsLoggedIn }) {
   return (
     // Toolbar principal fija en la parte superior
     <Toolbar
-      sx={styles.toolbar}
+      sx={sx.toolbar}
       disableGutters
     >
       {/* Logo y título agrupados, clicable para volver al inicio */}
       <Box
-        sx={styles.logoTitleContainer}
+        sx={sx.logoTitleContainer}
         onClick={() => {
           // Si el usuario está logeado, navega al home, si no, navega al login
           const token = localStorage.getItem('token');
@@ -206,14 +211,14 @@ function Banner({ setIsLoggedIn }) {
           }
         }}
       >
-        <img src={logo} alt="Logo" style={styles.logo} />
-        <Typography sx={styles.title}>
+        <img src={logo} alt="Logo" style={sx.logo} />
+        <Typography sx={sx.title}>
           SMART-TDAH
         </Typography>
       </Box>
 
       {/* Contenedor derecho: idioma, switch de modo, logout */}
-      <Box sx={styles.rightContainer}>
+      <Box sx={sx.rightContainer}>
         {/* Selector de idioma con bandera e idioma actual */}
         <IconButton
           color="inherit"
@@ -222,11 +227,11 @@ function Banner({ setIsLoggedIn }) {
           sx={{ mr: 0 }}
         >
           <Language />
-          <Box sx={styles.flagBox}>
+          <Box sx={sx.flagBox}>
             <img
               src={flagMap[language]}
               alt={language}
-              style={styles.flagImg}
+              style={sx.flagImg}
             />
             <i>{language}</i>
           </Box>
@@ -241,7 +246,7 @@ function Banner({ setIsLoggedIn }) {
           {Object.entries(flagMap).map(([lang, flag]) => (
             <MenuItem key={lang} onClick={() => handleLanguageChange(lang)}>
               <Box display="flex" alignItems="center">
-                <img src={flag} alt={lang} style={styles.menuFlagImg} />
+                <img src={flag} alt={lang} style={sx.menuFlagImg} />
                 {lang === 'en' ? 'English' : lang === 'es' ? 'Español' : lang === 'gal' ? 'Galego' : 'Português'}
               </Box>
             </MenuItem>
@@ -257,7 +262,7 @@ function Banner({ setIsLoggedIn }) {
         />
 
         {/* Separador visual */}
-        <Divider sx={styles.divider} />
+        <Divider sx={sx.divider} />
 
         {/* Botón de logout */}
         <IconButton color="inherit" onClick={handleLogout}>

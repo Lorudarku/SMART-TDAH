@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState, useRef, useCallback } from "react";
-import { Box, Button, Checkbox, Container, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, TextField, Typography, useTheme } from "@mui/material";
+import { Box, Button, Checkbox, Container, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, Typography, useTheme } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { enGB, es, ptBR } from "date-fns/locale";
@@ -88,7 +88,7 @@ const styles = (theme) => ({
   filterFormControl: {
     minWidth: 150, // Ancho mínimo
     // --- Responsive para móvil ---
-    '@media (maxWidth:600px)': {
+    [theme.breakpoints.down('sm')]: {
       minWidth: 110,
     },
   },
@@ -97,7 +97,7 @@ const styles = (theme) => ({
     minWidth: 120, // Ancho mínimo
     mx: 0.5, // Margen horizontal
     // --- Responsive para móvil ---
-    '@media (maxWidth:600px)': {
+    [theme.breakpoints.down('sm')]: {
       minWidth: 80,
     },
   },
@@ -235,15 +235,19 @@ const Charts = memo(({ filteredStats, getJuego, getDificultad }) => {
                 value={filters.minDate}
                 onChange={(newValue) => setFilters({ ...filters, minDate: newValue })}
                 maxDate={new Date()}
-                renderInput={(params) => <TextField {...params} size="small" sx={sx.datePickerField} />}
+                slotProps={{
+                  textField: { size: 'small', sx: sx.datePickerField },
+                }}
               />
               <DatePicker
                 label={messages[language]?.to}
                 value={filters.maxDate}
                 onChange={(newValue) => setFilters({ ...filters, maxDate: newValue })}
-                renderInput={(params) => <TextField {...params} size="small" sx={sx.datePickerField} />}
                 minDate={filters.minDate}
                 maxDate={new Date()}
+                slotProps={{
+                  textField: { size: 'small', sx: sx.datePickerField },
+                }}
               />
             </Box>
           )}
