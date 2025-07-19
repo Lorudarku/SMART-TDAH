@@ -24,7 +24,16 @@ if (!JWT_SECRET) {
 const HOST = process.env.HOST || "localhost"; // Cambia HOST en .env para alternar
 const PORT = process.env.SERVER_PORT || 5000;
 
-app.use(cors()); // Usa el middleware cors
+// Lee el origen permitido desde variable de entorno
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:3000';
+
+// Configura CORS para permitir solo el origen del frontend y aceptar preflight y headers comunes
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(bodyParser.json());
 
 //Funcion para verificar el token
@@ -279,3 +288,6 @@ app.post('/change-password', checkToken, async (req, res) => {
 app.listen(PORT, HOST, () => {
   console.log(`Servidor escuchando en http://${HOST}:${PORT}`);
 });
+// Gemini API endpoint
+const geminiRouter = require('./routes/gemini');
+app.use('/api/gemini', geminiRouter);

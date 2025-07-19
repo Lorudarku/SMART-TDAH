@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Charts from '../../components/Charts/Charts';
+import Chat from '../../components/Chat/Chat';
+import SidePanel from '../../components/SidePanel/SidePanel';
 import { backendUrl } from '../../utils/constants';
 import { useLanguage } from '../../hooks/LanguageContext';
 import messages from '../../utils/translations.json';
@@ -28,6 +30,8 @@ const styles = (theme) => ({
     minHeight: '100vh',
     position: 'relative',
     width: '100%',
+    // El paddingRight dinámico y el modo overlay se gestionan en el componente
+    transition: 'padding-right 0.2s cubic-bezier(0.4,0,0.2,1)',
   },
   // Botón de descarga, fijo en la esquina superior derecha
   downloadBtnBox: {
@@ -105,6 +109,13 @@ const styles = (theme) => ({
   },
 });
 
+
+
+/**
+ * Página de estadísticas de un alumno concreto.
+ * Controla el estado y visibilidad del chat lateral y expone un callback para el botón de chat del SidePanel.
+ * Cumple SRP: toda la lógica de presentación y control del chat está centralizada aquí.
+ */
 function AlumnoData({ isLoggedIn }) {
   const { id_alumno } = useParams();
   const [filteredStats, setFilteredStats] = useState([]);
@@ -114,6 +125,56 @@ function AlumnoData({ isLoggedIn }) {
   const sx = styles(theme); // estilos centralizados
   const { language } = useLanguage();
   const statsRef = useRef();
+  // =====================
+  // Estado y lógica para el chat lateral (ancho, colapso y overlay controlados desde aquí)
+  // =====================
+  const CHAT_INITIAL_WIDTH = 400;
+  const CHAT_COLLAPSED_WIDTH = 36;
+  const MIN_CONTENT_WIDTH = 600; // px mínimos para el contenido principal
+  const [chatWidth, setChatWidth] = useState(CHAT_INITIAL_WIDTH);
+  const [chatCollapsed, setChatCollapsed] = useState(false);
+  const [isOverlay, setIsOverlay] = useState(false); // true = chat superpuesto
+
+  /**
+   * Callback que alterna el estado de colapso del chat.
+   * Se usa tanto desde el propio Chat como desde el botón del SidePanel.
+   */
+  const handleChatCollapse = useCallback(() => {
+    setChatCollapsed((prev) => {
+      const next = !prev;
+      setChatWidth(next ? CHAT_COLLAPSED_WIDTH : CHAT_INITIAL_WIDTH);
+      return next;
+    });
+  }, []);
+
+  /**
+   * Callback para el botón de chat del SidePanel.
+   * Si el chat está colapsado, lo despliega; si está abierto, lo colapsa.
+   * Así el botón siempre alterna el estado de visibilidad del chat.
+   */
+  const handleChatButtonClick = useCallback(() => {
+    handleChatCollapse();
+  }, [handleChatCollapse]);
+
+  // Efecto: cambia a overlay si la ventana es demasiado estrecha
+  React.useEffect(() => {
+    function handleResize() {
+      const windowWidth = window.innerWidth;
+      // Si el espacio restante para el contenido sería menor que el mínimo, activa overlay
+      setIsOverlay(windowWidth - (chatCollapsed ? CHAT_COLLAPSED_WIDTH : chatWidth) < MIN_CONTENT_WIDTH);
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [chatWidth, chatCollapsed]);
+
+  // Calcula el paddingRight dinámico según el modo overlay y el estado del chat
+  const dynamicRootSx = {
+    ...sx.root,
+    paddingRight: !isOverlay && !chatCollapsed ? `${chatWidth}px` : 0,
+  };
+
+
 
   useEffect(() => {
     if (!id_alumno || isNaN(id_alumno)) {
@@ -231,9 +292,12 @@ function AlumnoData({ isLoggedIn }) {
     }
   };
 
-  // Layout principal
+  // Render principal: el paddingRight solo se aplica si el chat no está en overlay
   return isLoggedIn ? (
-    <Box sx={sx.root}>
+    <Box sx={dynamicRootSx}>
+      {/* SidePanel: el botón de chat solo aparece en esta página y llama a handleChatButtonClick */}
+      <SidePanel onChatClick={handleChatButtonClick} />
+
       {/* Botón para descargar el informe, fijo en la esquina superior derecha */}
       <Box sx={sx.downloadBtnBox}>
         <Button variant="contained" color="primary" onClick={handleDownloadReport}>
@@ -273,6 +337,14 @@ function AlumnoData({ isLoggedIn }) {
       {error && (
         <Box sx={sx.errorBox}><Alert severity="error">{error}</Alert></Box>
       )}
+      {/* Chat lateral: desplaza el contenido salvo en modo overlay, donde se superpone */}
+      <Chat
+        width={chatWidth}
+        setWidth={setChatWidth}
+        collapsed={chatCollapsed}
+        onCollapse={handleChatCollapse}
+        overlay={isOverlay}
+      />
     </Box>
   ) : (
     <main>
