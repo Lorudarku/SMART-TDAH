@@ -31,7 +31,7 @@ const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:3000';
 app.use(cors({
   origin: FRONTEND_ORIGIN,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(bodyParser.json());
@@ -50,6 +50,21 @@ const checkToken = (req, res, next) => { //req: request, res: response, next: ne
     next(); // Llamar al siguiente middleware
   } catch (err) { // Manejar errores
     return res.status(403).send('Invalid or expired token'); // Enviar un mensaje de error de token inválido o caducado
+  }
+};
+
+// Middleware para comprobar si el usuario es admin
+const checkAdmin = (req, res, next) => {
+  try {
+    const authHeader = req.get('Authorization');
+    if (!authHeader) return res.status(401).send('Unauthorized');
+    const token = authHeader.split(' ')[1];
+    const payload = jwt.verify(token, JWT_SECRET);
+    if (payload.rol !== 'admin') return res.status(403).send('Forbidden: Admins only');
+    req.userId = payload.userId;
+    next();
+  } catch (err) {
+    return res.status(403).send('Invalid or expired token');
   }
 };
 
@@ -165,27 +180,56 @@ app.get('/alumnos/:id_alumno', checkToken, async (req, res) => { //req: request,
   }
 });
 
-//Devuelve datos del profesor logeado
-app.get('/profile', checkToken, async (req, res) => { //req: request, res: response
-  const idProfesor = req.userId; // Obtener el id del profesor del token JWT
-
-  if (!idProfesor) { // Si no se proporcionó un id de profesor
-    return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado
+//Devuelve datos del profesor o admin logeado
+app.get('/profile', checkToken, async (req, res) => {
+  const userId = req.userId;
+  let userRole = null;
+  // Extraer el rol del token
+  try {
+    const authHeader = req.get('Authorization');
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token) {
+      const payload = jwt.decode(token);
+      userRole = payload.rol;
+    }
+  } catch (err) {
+    return res.status(401).send('Invalid token');
   }
 
-  try { // Intentar obtener los datos del perfil del profesor
-    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
-    const result = await client.query('SELECT nombre, apellidos, email FROM profesores WHERE id_profesor = $1', [idProfesor]); // Ejecutar una consulta para obtener los datos del perfil del profesor
-    client.release(); // Liberar el cliente
+  if (!userId || !userRole) {
+    return res.status(401).send('Unauthorized');
+  }
 
-    if (result.rows.length === 0) { // Si no se encontraron datos del perfil del profesor
-      return res.status(404).send('Profile not found'); // Enviar un mensaje de error de perfil no encontrado
+  try {
+    const client = await pool.connect();
+    let result;
+    if (userRole === 'admin') {
+      result = await client.query('SELECT nombre, apellidos, email FROM admins WHERE id_admin = $1', [userId]);
+    } else {
+      result = await client.query('SELECT nombre, apellidos, email FROM profesores WHERE id_profesor = $1', [userId]);
+    }
+    client.release();
+    if (result.rows.length === 0) {
+      return res.status(404).send('Profile not found');
     }
 
     res.status(200).json(result.rows[0]); // Enviar los datos del perfil del profesor en la respuesta
   } catch (err) { // Manejar errores
     console.error(err);
     res.status(500).send('Error fetching profile');
+  }
+});
+
+// GET /profesores (solo admin)
+app.get('/profesores', checkAdmin, async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('SELECT id_profesor, nombre, apellidos, email, puede_gestionar_alumnos FROM profesores ORDER BY id_profesor');
+    client.release();
+    return res.status(200).json(result.rows);
+  } catch (err) {
+    console.error('Error fetching profesores:', err.message);
+    return res.status(500).send('Error fetching profesores');
   }
 });
 
@@ -218,30 +262,42 @@ app.post('/signup', async (req, res) => { //req: request, res: response
   }
 });
 
-// Ruta de login de un usuario (profesor)
-app.post('/login', async (req, res) => { //req: request, res: response
-  const { email, password } = req.body; // Obtener las credenciales del cuerpo de la solicitud
-
-  try { // Intentar buscar al usuario en la base de datos
-    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
-    const result = await client.query('SELECT * FROM profesores WHERE email = $1', [email]); // Buscar al usuario por su correo electrónico
-    if (result.rows.length === 0) { // Si no se encontró al usuario
-      client.release();
-      return res.status(401).send('Invalid credentials'); // Enviar un mensaje de error de credenciales inválidas
+// Ruta de login unificada para profesores y admins
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  let client;
+  try {
+    client = await pool.connect();
+    // Buscar primero en profesores
+    let result = await client.query('SELECT * FROM profesores WHERE email = $1', [email]);
+    if (result.rows.length > 0) {
+      const profesor = result.rows[0];
+      if (await bcrypt.compare(password, profesor.password)) {
+        const token = jwt.sign({ userId: profesor.id_profesor, rol: 'profesor' }, JWT_SECRET, { expiresIn: '1h' });
+        client.release();
+        return res.status(200).json({ token, rol: 'profesor', nombre: profesor.nombre, apellidos: profesor.apellidos, id: profesor.id_profesor });
+      } else {
+        client.release();
+        return res.status(401).send('Invalid credentials');
+      }
     }
-
-    const profesor = result.rows[0]; // Obtener al usuario de la base de datos
-    // Comparar la contraseña proporcionada con la contraseña almacenada en la base de datos
-    if (await bcrypt.compare(password, profesor.password)) {
-      // Generar un token JWT para el usuario
-      const token = jwt.sign({ userId: profesor.id_profesor }, JWT_SECRET, { expiresIn: '1h' }); // El token expira en 1 hora
-      client.release();
-      return res.status(200).json({ token }); // Enviar el token al cliente en la respuesta
-    } else { // Si las contraseñas no coinciden
-      client.release();
-      return res.status(401).send('Invalid credentials'); // Enviar un mensaje de error de credenciales inválidas
+    // Si no está en profesores, buscar en admins
+    result = await client.query('SELECT * FROM admins WHERE email = $1', [email]);
+    if (result.rows.length > 0) {
+      const admin = result.rows[0];
+      if (await bcrypt.compare(password, admin.password)) {
+        const token = jwt.sign({ userId: admin.id_admin, rol: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
+        client.release();
+        return res.status(200).json({ token, rol: 'admin', nombre: admin.nombre, apellidos: admin.apellidos, id: admin.id_admin });
+      } else {
+        client.release();
+        return res.status(401).send('Invalid credentials');
+      }
     }
-  } catch (err) { // Manejar errores
+    client.release();
+    return res.status(401).send('Invalid credentials');
+  } catch (err) {
+    if (client) client.release();
     console.error(err);
     return res.status(500).send('Error logging in'); // Enviar un mensaje de error de inicio de sesión
   }
@@ -250,7 +306,19 @@ app.post('/login', async (req, res) => { //req: request, res: response
 // Ruta para cambiar la contraseña
 app.post('/change-password', checkToken, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
-  const idProfesor = req.userId;
+  const userId = req.userId;
+  let userRole = null;
+  // Extraer el rol del token
+  try {
+    const authHeader = req.get('Authorization');
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token) {
+      const payload = jwt.decode(token);
+      userRole = payload.rol;
+    }
+  } catch (err) {
+    return res.status(401).send('Invalid token');
+  }
 
   if (!currentPassword || !newPassword) {
     return res.status(400).send('Current and new passwords are required');
@@ -258,7 +326,12 @@ app.post('/change-password', checkToken, async (req, res) => {
 
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT password FROM profesores WHERE id_profesor = $1', [idProfesor]);
+    let result;
+    if (userRole === 'admin') {
+      result = await client.query('SELECT password FROM admins WHERE id_admin = $1', [userId]);
+    } else {
+      result = await client.query('SELECT password FROM profesores WHERE id_profesor = $1', [userId]);
+    }
 
     if (result.rows.length === 0) {
       client.release();
@@ -272,13 +345,72 @@ app.post('/change-password', checkToken, async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await client.query('UPDATE profesores SET password = $1 WHERE id_profesor = $2', [hashedPassword, idProfesor]);
+    if (userRole === 'admin') {
+      await client.query('UPDATE admins SET password = $1 WHERE id_admin = $2', [hashedPassword, userId]);
+    } else {
+      await client.query('UPDATE profesores SET password = $1 WHERE id_profesor = $2', [hashedPassword, userId]);
+    }
     client.release();
 
     return res.status(200).send('Password changed successfully');
   } catch (err) {
     console.error('Error changing password:', err.message);
     return res.status(500).send('Error changing password');
+  }
+});
+
+// ############################################################################################################################
+// PATCH
+// ############################################################################################################################
+
+// PATCH /profesores/:id/permiso (solo admin)
+app.patch('/profesores/:id/permiso', checkAdmin, async (req, res) => {
+  const idProfesor = parseInt(req.params.id, 10);
+  const { puede_gestionar_alumnos } = req.body;
+  if (typeof puede_gestionar_alumnos !== 'boolean') {
+    return res.status(400).send('El campo puede_gestionar_alumnos debe ser booleano');
+  }
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      'UPDATE profesores SET puede_gestionar_alumnos = $1 WHERE id_profesor = $2 RETURNING id_profesor, nombre, apellidos, email, puede_gestionar_alumnos',
+      [puede_gestionar_alumnos, idProfesor]
+    );
+    client.release();
+    if (result.rows.length === 0) {
+      return res.status(404).send('Profesor no encontrado');
+    }
+    return res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error('Error actualizando permiso:', err.message);
+    return res.status(500).send('Error actualizando permiso');
+  }
+});
+
+// ############################################################################################################################
+// DELETE
+// ############################################################################################################################
+
+// DELETE /profesores/:id (solo admin)
+app.delete('/profesores/:id', checkAdmin, async (req, res) => {
+  const idProfesor = parseInt(req.params.id, 10);
+  if (isNaN(idProfesor)) {
+    return res.status(400).send('ID de profesor inválido');
+  }
+  try {
+    const client = await pool.connect();
+    // Eliminar relaciones en profesor_alumno primero (si existen)
+    await client.query('DELETE FROM profesor_alumno WHERE id_profesor = $1', [idProfesor]);
+    // Eliminar el profesor
+    const result = await client.query('DELETE FROM profesores WHERE id_profesor = $1 RETURNING id_profesor', [idProfesor]);
+    client.release();
+    if (result.rows.length === 0) {
+      return res.status(404).send('Profesor no encontrado');
+    }
+    return res.status(200).json({ message: 'Profesor eliminado correctamente' });
+  } catch (err) {
+    console.error('Error eliminando profesor:', err.message);
+    return res.status(500).send('Error eliminando profesor');
   }
 });
 

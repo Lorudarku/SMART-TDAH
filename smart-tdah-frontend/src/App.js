@@ -6,6 +6,8 @@ import Banner from "./components/Banner/Banner";
 import Login from "./components/Login/Login";
 import SignUp from "./components/SignUp/SignUp";
 import HomePage from "./pages/HomePage/HomePage";
+import ProfesoresAdmin from "./pages/ProfesoresAdmin/ProfesoresAdmin";
+import { getUserRole } from './utils/auth';
 import AlumnoData from "./pages/AlumnoData/AlumnoData";
 import AlumnoList from "./components/AlumnoList/AlumnoList";
 import SidePanelLayout from "./layouts/SidePanelLayout";
@@ -132,8 +134,18 @@ function App() {
                 <Route
                   path="/alumnos"
                   element={
-                    isLoggedIn ? (
+                    isLoggedIn && getUserRole() === 'profesor' ? (
                       <SidePanelLayout render={<AlumnoList />} />
+                    ) : (
+                      <Navigate to="/login" />
+                    )
+                  }
+                />
+                <Route
+                  path="/profesores"
+                  element={
+                    isLoggedIn && getUserRole() === 'admin' ? (
+                      <SidePanelLayout render={<ProfesoresAdmin />} />
                     ) : (
                       <Navigate to="/login" />
                     )

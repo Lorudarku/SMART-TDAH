@@ -7,6 +7,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useLanguage } from '../../hooks/LanguageContext';
 import messages from '../../utils/translations.json';
+import { getUserRole } from '../../utils/auth';
 
 // =====================
 // Estilos centralizados y documentados
@@ -130,8 +131,17 @@ const SidePanel = ({ onChatClick }) => {
       {/* separación */}
       <Divider sx={dividerSx(theme)} />
 
-      {/* Botón para la lista de alumnos */}
-      <IconButton onClick={() => navigate('/alumnos')}>
+      {/* Botón para la lista de alumnos o profesores según rol */}
+      <IconButton
+        onClick={() => {
+          const rol = getUserRole();
+          if (rol === 'admin') {
+            navigate('/profesores');
+          } else {
+            navigate('/alumnos');
+          }
+        }}
+      >
         <ListAltIcon sx={buttonSx(theme)} />
         <span style={{ fontSize: 10 }}>{messages[language]?.students}</span>
       </IconButton>

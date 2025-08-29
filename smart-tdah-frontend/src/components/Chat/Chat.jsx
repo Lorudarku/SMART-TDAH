@@ -167,7 +167,6 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
     transition: 'background 0.3s, color 0.3s, border-color 0.3s, border-radius 0.2s',
     borderRight: 'none',
     overflow: 'visible',
-    userSelect: resizing.current ? 'none' : 'auto',
     pointerEvents: 'auto',
     touchAction: 'auto',
   };
@@ -187,6 +186,7 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
             height: '100%',
             cursor: 'ew-resize',
             background: 'transparent',
+            userSelect: 'none', // Solo el handler de resize es no seleccionable
             '&:hover': { background: theme.palette.action.hover },
           }}
           aria-label="Ajustar ancho del chat"
@@ -292,6 +292,7 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
+              disablePortal={overlay}
               MenuListProps={{
                 'aria-labelledby': 'ia-model-menu',
                 sx: {
@@ -314,7 +315,7 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
                   minWidth: 140,
                   p: 0,
                   transition: 'background 0.3s, color 0.3s',
-                  zIndex: 3000
+                  zIndex: overlay ? 3002 : 3000,
                 },
               }}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
@@ -358,7 +359,18 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
             }}
           >
             {/* Área de mensajes */}
-            <Box sx={{ p: 2, flex: 1, overflowY: 'auto', bgcolor: 'background.paper', transition: 'background 0.3s, color 0.3s' }}>
+            <Box sx={{
+              p: 2,
+              flex: 1,
+              overflowY: 'auto',
+              bgcolor: 'background.paper',
+              transition: 'background 0.3s, color 0.3s',
+              // Permitir selección de texto y evitar scroll horizontal
+              overflowX: 'hidden',
+              wordBreak: 'break-word',
+              WebkitUserSelect: 'text',
+              userSelect: 'text',
+            }}>
               {messagesList.map((msg, index) => {
                 if (msg.sender === 'separator') {
                   return (
@@ -377,6 +389,9 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
                       mb: 1,
                       ml: msg.sender === 'user' ? 4 : 0,
                       mr: msg.sender === 'LLMS' ? 4 : 0,
+                      // Permitir selección de texto
+                      WebkitUserSelect: 'text',
+                      userSelect: 'text',
                     }}
                   >
                     {msg.sender === 'LLMS' ? (
@@ -391,8 +406,11 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
                           color: '#111',
                           boxShadow: 0,
                           whiteSpace: 'normal',
+                          maxWidth: '100%',
+                          overflowWrap: 'break-word',
                         }}
                         component="span"
+                        // Ajustar el renderizado de bloques de código para que hagan wrap
                         dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }}
                       />
                     ) : (
@@ -407,6 +425,8 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
                           color: '#111',
                           boxShadow: 1,
                           whiteSpace: 'pre-line',
+                          maxWidth: '100%',
+                          overflowWrap: 'break-word',
                         }}
                       >
                         {msg.text}
@@ -417,19 +437,34 @@ const Chat = ({ width, setWidth, collapsed, onCollapse, overlay = false, alumnoN
               })}
               {loading && (
                 <Box sx={{ textAlign: 'left', mb: 1 }}>
-                  <Typography variant="body2" sx={{ display: 'inline-block', px: 1.5, py: 0.5, borderRadius: 1, bgcolor: 'secondary.light', color: 'text.primary' }}>
+                  <Typography variant="body2" sx={{ display: 'inline-block', px: 1.5, py: 0.5, borderRadius: 1, bgcolor: 'secondary.light', color: 'text.primary', maxWidth: '100%', overflowWrap: 'break-word' }}>
                     {messages[language]?.loading || 'Cargando...'}
                   </Typography>
                 </Box>
               )}
               {error && (
                 <Box sx={{ textAlign: 'left', mb: 1 }}>
-                  <Typography variant="body2" color="error" sx={{ display: 'inline-block', px: 1.5, py: 0.5, borderRadius: 1, color: 'text.primary', bgcolor: 'error.light' }}>
+                  <Typography variant="body2" color="error" sx={{ display: 'inline-block', px: 1.5, py: 0.5, borderRadius: 1, color: 'text.primary', bgcolor: 'error.light', maxWidth: '100%', overflowWrap: 'break-word' }}>
                     {error}
                   </Typography>
                 </Box>
               )}
             </Box>
+            {/* Ajuste global para bloques de código en markdown: forzar wrap */}
+            <style>{`
+              .MuiBox-root pre, .MuiBox-root code {
+                white-space: pre-wrap !important;
+                word-break: break-word !important;
+                overflow-x: auto;
+                font-family: 'Fira Mono', 'Menlo', 'Consolas', 'Monaco', 'Liberation Mono', 'Courier New', monospace;
+                font-size: 0.97em;
+                background: #f5f5f5;
+                border-radius: 6px;
+                padding: 0.3em 0.6em;
+                box-sizing: border-box;
+                max-width: 100%;
+              }
+            `}</style>
 
             {/* Campo de entrada de mensaje */}
             <Box sx={{
