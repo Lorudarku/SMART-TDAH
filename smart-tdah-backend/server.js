@@ -288,6 +288,6 @@ app.post('/change-password', checkToken, async (req, res) => {
 app.listen(PORT, HOST, () => {
   console.log(`Servidor escuchando en http://${HOST}:${PORT}`);
 });
-// Gemini API endpoint
-const geminiRouter = require('./routes/gemini');
-app.use('/api/gemini', geminiRouter);
+// LLMS API endpoint
+const llmsRouter = require('./routes/LLMS');
+app.use('/ask', llmsRouter);

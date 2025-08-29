@@ -344,6 +344,7 @@ function AlumnoData({ isLoggedIn }) {
         collapsed={chatCollapsed}
         onCollapse={handleChatCollapse}
         overlay={isOverlay}
+        alumnoNombre={filteredStats[0] ? `${filteredStats[0].nombre} ${filteredStats[0].apellidos}` : ''}
       />
     </Box>
   ) : (

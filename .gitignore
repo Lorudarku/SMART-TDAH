@@ -4,11 +4,22 @@
 /smart-tdah-backend/dbCompleteSetup 
 /smart-tdah-backend/node_modules
 /smart-tdah-backend/.env
+/smart-tdah-backend/routes/*.log
+/smart-tdah-backend/routes/*.md
+/smart-tdah-backend/routes/*.pdf
+/smart-tdah-backend/routes/*.txt
+
+.continue/
 
 /smart-tdah-frontend/node_modules
+/smart-tdah-frontend/.env
+/smart-tdah-frontend/routes/*.log
+/smart-tdah-frontend/routes/*.md
+/smart-tdah-frontend/routes/*.pdf
+/smart-tdah-frontend/routes/*.txt
 /.pnp
 .pnp.js
-copilot.md
+*.md
 
 # testing
 /coverage

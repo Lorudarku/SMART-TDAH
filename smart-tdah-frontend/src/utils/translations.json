@@ -76,7 +76,8 @@
     "passwordMismatch": "Las contraseñas no coinciden",
     "passwordChangeSuccess": "Contraseña cambiada con éxito",
     "passwordChangeError": "Error al cambiar la contraseña",
-    "profileTitle": "Perfil"
+    "profileTitle": "Perfil",
+    "chatAskPlaceholder": "Hazme una pregunta..."
   },
   "gal": {
     "welcome": "Benvido a SMART-TDAH",
@@ -155,7 +156,8 @@
     "passwordMismatch": "Os contrasinais non coinciden",
     "passwordChangeSuccess": "Contrasinal cambiado con éxito",
     "passwordChangeError": "Erro ao cambiar o contrasinal",
-    "profileTitle": "Perfil"
+    "profileTitle": "Perfil",
+    "chatAskPlaceholder": "Fai unha pregunta..."
   },
   "en": {
     "welcome": "Welcome to SMART-TDAH",
@@ -234,7 +236,8 @@
     "passwordMismatch": "Passwords do not match",
     "passwordChangeSuccess": "Password changed successfully",
     "passwordChangeError": "Error changing password",
-    "profileTitle": "Profile"
+    "profileTitle": "Profile",
+    "chatAskPlaceholder": "Ask me a question..."
   },
   "pt": {
     "welcome": "Bem-vindo ao SMART-TDAH",
@@ -313,6 +316,7 @@
     "passwordMismatch": "As senhas não coincidem",
     "passwordChangeSuccess": "Senha alterada com sucesso",
     "passwordChangeError": "Erro ao alterar a senha",
-    "profileTitle": "Perfil"
+    "profileTitle": "Perfil",
+    "chatAskPlaceholder": "Faça-me uma pergunta..."
   }
 }
