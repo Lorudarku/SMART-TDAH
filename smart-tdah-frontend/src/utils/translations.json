@@ -86,7 +86,19 @@
     "profesoresDeleteSuccess": "Profesor eliminado correctamente",
     "profesoresDeleteError": "Error eliminando profesor",
     "profesoresPermisoCol": "¿Puede gestionar alumnos?",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "addAlumnoTitle": "Añadir alumno",
+    "searchByEmail": "Buscar por email",
+    "add": "Añadir",
+    "added": "Añadido",
+    "addAlumnoSuccess": "Alumno añadido correctamente",
+    "addAlumnoError": "Error al añadir alumno",
+    "close": "Cerrar",
+    "deleteAlumnoTooltip": "Eliminar alumno",
+    "deleteAlumnoConfirm": "¿Seguro que quieres eliminar este alumno de tu lista?",
+    "deleteAlumnoSuccess": "Alumno eliminado correctamente",
+    "deleteAlumnoError": "Error al eliminar alumno",
+    "cancel": "Cancelar"
   },
   "gal": {
     "welcome": "Benvido a SMART-TDAH",
@@ -175,7 +187,19 @@
     "profesoresDeleteSuccess": "Profesor eliminado correctamente",
     "profesoresDeleteError": "Erro ao eliminar o profesor",
     "profesoresPermisoCol": "Pode xestionar alumnos?",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "addAlumnoTitle": "Engadir alumno",
+    "searchByEmail": "Buscar por correo",
+    "add": "Engadir",
+    "added": "Engadido",
+    "addAlumnoSuccess": "Alumno engadido correctamente",
+    "addAlumnoError": "Erro ao engadir alumno",
+    "close": "Pechar",
+    "deleteAlumnoTooltip": "Eliminar alumno",
+    "deleteAlumnoConfirm": "Seguro que queres eliminar este alumno da túa lista?",
+    "deleteAlumnoSuccess": "Alumno eliminado correctamente",
+    "deleteAlumnoError": "Erro ao eliminar alumno",
+    "cancel": "Cancelar"
   },
   "en": {
     "welcome": "Welcome to SMART-TDAH",
@@ -264,7 +288,19 @@
     "profesoresDeleteSuccess": "Teacher deleted successfully",
     "profesoresDeleteError": "Error deleting teacher",
     "profesoresPermisoCol": "Can manage students?",
-    "delete": "Delete"
+    "delete": "Delete",
+    "addAlumnoTitle": "Add student",
+    "searchByEmail": "Search by email",
+    "add": "Add",
+    "added": "Added",
+    "addAlumnoSuccess": "Student added successfully",
+    "addAlumnoError": "Error adding student",
+    "close": "Close",
+    "deleteAlumnoTooltip": "Remove student",
+    "deleteAlumnoConfirm": "Are you sure you want to remove this student from your list?",
+    "deleteAlumnoSuccess": "Student removed successfully",
+    "deleteAlumnoError": "Error removing student",
+    "cancel": "Cancel"
   },
   "pt": {
     "welcome": "Bem-vindo ao SMART-TDAH",
@@ -353,6 +389,18 @@
     "profesoresDeleteSuccess": "Professor excluído com sucesso",
     "profesoresDeleteError": "Erro ao excluir professor",
     "profesoresPermisoCol": "Pode gerir alunos?",
-    "delete": "Excluir"
+    "delete": "Excluir",
+    "addAlumnoTitle": "Adicionar aluno",
+    "searchByEmail": "Buscar por email",
+    "add": "Adicionar",
+    "added": "Adicionado",
+    "addAlumnoSuccess": "Aluno adicionado com sucesso",
+    "addAlumnoError": "Erro ao adicionar aluno",
+    "close": "Fechar",
+    "deleteAlumnoTooltip": "Excluir aluno",
+    "deleteAlumnoConfirm": "Tem certeza de que deseja remover este aluno da sua lista?",
+    "deleteAlumnoSuccess": "Aluno removido com sucesso",
+    "deleteAlumnoError": "Erro ao remover aluno",
+    "cancel": "Cancelar"
   }
 }

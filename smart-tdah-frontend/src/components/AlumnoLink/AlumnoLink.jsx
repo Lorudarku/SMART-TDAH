@@ -6,10 +6,13 @@
 
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import { Avatar, Box, Typography, Paper, useTheme } from '@mui/material';
+import { Avatar, Box, Typography, Paper, useTheme, IconButton, Dialog, DialogTitle, DialogActions, Button, Alert } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import SchoolIcon from '@mui/icons-material/School';
+import { useLanguage } from '../../hooks/LanguageContext';
+import messages from '../../utils/translations.json';
 
 // =====================
 // Estilos centralizados
@@ -94,10 +97,56 @@ const styles = {
 // =============================
 // Componente principal AlumnoLink
 // =============================
-function AlumnoLink({ alumnoData, backgroundColor, isLoggedIn }) {
-  // Hook de navegación de React Router
+function AlumnoLink({ alumnoData, backgroundColor, isLoggedIn, puedeGestionarAlumnos, onAlumnoDeleted }) {
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [success, setSuccess] = React.useState('');
+  const { language } = useLanguage();
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    setOpenDialog(true);
+    setError('');
+    setSuccess('');
+  };
+  const handleCloseDialog = (e) => {
+    if (e) e.stopPropagation();
+    setOpenDialog(false);
+    setError('');
+    setSuccess('');
+  };
+  const confirmDelete = async (e) => {
+    e.stopPropagation();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001'}/profesor-alumno`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id_alumno: alumnoData.idAlumno })
+      });
+      if (res.ok) {
+        setSuccess(messages[language]?.deleteAlumnoSuccess || 'Alumno eliminado correctamente');
+        setTimeout(() => {
+          setOpenDialog(false);
+          if (onAlumnoDeleted) onAlumnoDeleted();
+        }, 1000);
+      } else {
+        setError(messages[language]?.deleteAlumnoError || 'Error al eliminar alumno');
+      }
+    } catch (err) {
+      setError(messages[language]?.deleteAlumnoError || 'Error al eliminar alumno');
+      setOpenDialog(false);
+    } finally {
+      setLoading(false);
+    }
+  };
   const navigate = useNavigate();
-  // Hook de tema de Material UI (acceso a colores y modo)
   const theme = useTheme();
 
   // --- Función para manejar el click sobre el alumno ---
@@ -150,6 +199,22 @@ function AlumnoLink({ alumnoData, backgroundColor, isLoggedIn }) {
             <EmailIcon fontSize="small" sx={{ ml: 1, mr: 0.5 }} />{email}
           </Typography>
         </Box>
+        {isLoggedIn && puedeGestionarAlumnos && (
+          <IconButton edge="end" color="error" sx={{ ml: 'auto' }} onClick={handleDelete} title={messages[language]?.deleteAlumnoTooltip || 'Eliminar alumno'}>
+            <DeleteIcon />
+          </IconButton>
+        )}
+        <Dialog open={openDialog} onClose={handleCloseDialog} onClick={e => e.stopPropagation()}>
+          <DialogTitle>{messages[language]?.deleteAlumnoConfirm || '¿Seguro que quieres eliminar este alumno de tu lista?'}</DialogTitle>
+          {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ mt: 1 }}>{success}</Alert>}
+          <DialogActions>
+            <Button onClick={handleCloseDialog} disabled={loading}>{messages[language]?.cancel || 'Cancelar'}</Button>
+            <Button onClick={confirmDelete} color="error" disabled={loading}>
+              {messages[language]?.delete || 'Eliminar'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     </div>
   );

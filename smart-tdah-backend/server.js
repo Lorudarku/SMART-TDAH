@@ -9,6 +9,12 @@ require('dotenv').config(); // Cargar variables de entorno desde .env
 
 const app = express();
 
+// Middleware global de log para depuración de rutas y cabeceras
+app.use((req, res, next) => {
+  //console.log(`[${req.method}] ${req.url} headers:`, req.headers);
+  next();
+});
+
 // ===============================
 // Cargar la clave secreta JWT desde variables de entorno
 // ===============================
@@ -36,20 +42,35 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 
-//Funcion para verificar el token
-const checkToken = (req, res, next) => { //req: request, res: response, next: next middleware
-  try { // Intentar verificar el token
-    const authHeader = req.get('Authorization'); // Obtener el encabezado de autorización
-    if (!authHeader) { // Si no se proporcionó un token
-      return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado
-    }
 
-    const token = authHeader.split(' ')[1]; // Obtener el token de la cabecera de autorización
-    const payload = jwt.verify(token, JWT_SECRET); // Verificar el token con la clave secreta
-    req.userId = payload.userId; // Agregar el id del usuario al objeto de solicitud
-    next(); // Llamar al siguiente middleware
-  } catch (err) { // Manejar errores
-    return res.status(403).send('Invalid or expired token'); // Enviar un mensaje de error de token inválido o caducado
+
+//Funcion para verificar el token (más robusta y con logs)
+const checkToken = (req, res, next) => {
+  try {
+    const authHeader = req.get('Authorization');
+    if (!authHeader) {
+      console.error('No Authorization header');
+      return res.status(401).send('Unauthorized: No Authorization header');
+    }
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      console.error('No token in Authorization header');
+      return res.status(401).send('Unauthorized: No token');
+    }
+    const payload = jwt.verify(token, JWT_SECRET);
+    // Log completo del payload para depuración
+    //console.log('Token payload:', payload);
+    // Permitir tanto userId/rol como userId/rol (compatibilidad)
+    req.userId = payload.userId || payload.userID || payload.id || payload.id_profesor || payload.id_admin;
+    req.userRole = payload.rol || payload.role || payload.rol_usuario;
+    if (!req.userId || !req.userRole) {
+      console.error('Token válido pero faltan campos: userId o rol', payload);
+      return res.status(401).send('Unauthorized: Token missing userId or rol');
+    }
+    next();
+  } catch (err) {
+    console.error('Token error:', err.message);
+    return res.status(403).send('Invalid or expired token');
   }
 };
 
@@ -205,8 +226,10 @@ app.get('/profile', checkToken, async (req, res) => {
     let result;
     if (userRole === 'admin') {
       result = await client.query('SELECT nombre, apellidos, email FROM admins WHERE id_admin = $1', [userId]);
+    } else if (userRole === 'profesor') {
+      result = await client.query('SELECT nombre, apellidos, email, puede_gestionar_alumnos FROM profesores WHERE id_profesor = $1', [userId]);
     } else {
-      result = await client.query('SELECT nombre, apellidos, email FROM profesores WHERE id_profesor = $1', [userId]);
+      return res.status(403).send('Invalid role');
     }
     client.release();
     if (result.rows.length === 0) {
@@ -217,6 +240,25 @@ app.get('/profile', checkToken, async (req, res) => {
   } catch (err) { // Manejar errores
     console.error(err);
     res.status(500).send('Error fetching profile');
+  }
+});
+
+// Buscar alumnos globalmente por email (para añadir a la lista de un profesor)
+app.get('/add-alumnos/buscar', checkToken, async (req, res) => {
+  const email = req.query.email || '';
+  //console.log('Buscando alumnos con email:', email);
+  if (!email) return res.status(200).json({ alumnos: [] });
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      'SELECT * FROM alumnos WHERE LOWER(email) LIKE $1 ORDER BY email LIMIT 50',
+      [`%${email.toLowerCase()}%`]
+    );
+    client.release();
+    return res.status(200).json({ alumnos: result.rows });
+  } catch (err) {
+    console.error('Error buscando alumnos globalmente:', err.message);
+    res.status(500).send('Error buscando alumnos');
   }
 });
 
@@ -359,6 +401,37 @@ app.post('/change-password', checkToken, async (req, res) => {
   }
 });
 
+// Asociar un alumno a un profesor (añadir a la lista)
+app.post('/profesor-alumno', checkToken, async (req, res) => {
+  const idProfesor = req.userId;
+  const { id_alumno } = req.body;
+  if (!idProfesor || !id_alumno) {
+    return res.status(400).json({ error: 'Faltan parámetros: id_alumno o token' });
+  }
+  try {
+    const client = await pool.connect();
+    // Verifica que el alumno existe
+    const alumnoRes = await client.query('SELECT 1 FROM alumnos WHERE id_alumno = $1', [id_alumno]);
+    if (alumnoRes.rowCount === 0) {
+      client.release();
+      return res.status(404).json({ error: 'Alumno no encontrado' });
+    }
+    // Verifica que la relación no existe ya
+    const relRes = await client.query('SELECT 1 FROM profesor_alumno WHERE id_profesor = $1 AND id_alumno = $2', [idProfesor, id_alumno]);
+    if (relRes.rowCount > 0) {
+      client.release();
+      return res.status(409).json({ error: 'El alumno ya está asociado a este profesor' });
+    }
+    // Inserta la relación
+    await client.query('INSERT INTO profesor_alumno (id_profesor, id_alumno) VALUES ($1, $2)', [idProfesor, id_alumno]);
+    client.release();
+    return res.status(201).json({ message: 'Alumno asociado correctamente' });
+  } catch (err) {
+    console.error('Error añadiendo alumno a profesor:', err.message);
+    return res.status(500).json({ error: 'Error añadiendo alumno a profesor' });
+  }
+});
+
 // ############################################################################################################################
 // PATCH
 // ############################################################################################################################
@@ -390,6 +463,30 @@ app.patch('/profesores/:id/permiso', checkAdmin, async (req, res) => {
 // ############################################################################################################################
 // DELETE
 // ############################################################################################################################
+
+// Elimina la relación entre un profesor y un alumno (profesor elimina alumno de su lista)
+app.delete('/profesor-alumno', checkToken, async (req, res) => {
+  const idProfesor = req.userId;
+  const { id_alumno } = req.body;
+  if (!idProfesor || !id_alumno) {
+    return res.status(400).send('Faltan parámetros');
+  }
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      'DELETE FROM profesor_alumno WHERE id_profesor = $1 AND id_alumno = $2 RETURNING *',
+      [idProfesor, id_alumno]
+    );
+    client.release();
+    if (result.rowCount === 0) {
+      return res.status(404).send('Relación no encontrada');
+    }
+    return res.status(200).json({ message: 'Alumno eliminado de la lista del profesor' });
+  } catch (err) {
+    console.error('Error al eliminar alumno de la lista:', err.message);
+    res.status(500).send('Error al eliminar alumno de la lista');
+  }
+});
 
 // DELETE /profesores/:id (solo admin)
 app.delete('/profesores/:id', checkAdmin, async (req, res) => {
