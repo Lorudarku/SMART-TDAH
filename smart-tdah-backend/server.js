@@ -1,13 +1,19 @@
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors'); 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('./dbConfig');
-
 require('dotenv').config(); // Cargar variables de entorno desde .env 
 
 const app = express();
+
+// Middleware global de log para depuración de rutas y cabeceras
+app.use((req, res, next) => {
+  //console.log(`[${req.method}] ${req.url} headers:`, req.headers);
+  next();
+});
 
 // ===============================
 // Cargar la clave secreta JWT desde variables de entorno
@@ -24,254 +30,65 @@ if (!JWT_SECRET) {
 const HOST = process.env.HOST || "localhost"; // Cambia HOST en .env para alternar
 const PORT = process.env.SERVER_PORT || 5000;
 
-app.use(cors()); // Usa el middleware cors
+// Lee el origen permitido desde variable de entorno
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:3000';
+
+// Configura CORS para permitir solo el origen del frontend y aceptar preflight y headers comunes
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(bodyParser.json());
 
-//Funcion para verificar el token
-const checkToken = (req, res, next) => { //req: request, res: response, next: next middleware
-  try { // Intentar verificar el token
-    const authHeader = req.get('Authorization'); // Obtener el encabezado de autorización
-    if (!authHeader) { // Si no se proporcionó un token
-      return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado
-    }
 
-    const token = authHeader.split(' ')[1]; // Obtener el token de la cabecera de autorización
-    const payload = jwt.verify(token, JWT_SECRET); // Verificar el token con la clave secreta
-    req.userId = payload.userId; // Agregar el id del usuario al objeto de solicitud
-    next(); // Llamar al siguiente middleware
-  } catch (err) { // Manejar errores
-    return res.status(403).send('Invalid or expired token'); // Enviar un mensaje de error de token inválido o caducado
+
+//Funcion para verificar el token (más robusta y con logs)
+const checkToken = (req, res, next) => {
+  try {
+    const authHeader = req.get('Authorization');
+    if (!authHeader) {
+      console.error('No Authorization header');
+      return res.status(401).send('Unauthorized: No Authorization header');
+    }
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      console.error('No token in Authorization header');
+      return res.status(401).send('Unauthorized: No token');
+    }
+    const payload = jwt.verify(token, JWT_SECRET);
+    // Log completo del payload para depuración
+    //console.log('Token payload:', payload);
+    // Permitir tanto userId/rol como userId/rol (compatibilidad)
+    req.userId = payload.userId || payload.userID || payload.id || payload.id_profesor || payload.id_admin;
+    req.userRole = payload.rol || payload.role || payload.rol_usuario;
+    if (!req.userId || !req.userRole) {
+      console.error('Token válido pero faltan campos: userId o rol', payload);
+      return res.status(401).send('Unauthorized: Token missing userId or rol');
+    }
+    next();
+  } catch (err) {
+    console.error('Token error:', err.message);
+    return res.status(403).send('Invalid or expired token');
   }
 };
 
-// ############################################################################################################################
-// GET
-// ############################################################################################################################
-
-// Ruta de prueba para verificar la conexión a la base de datos
-app.get('/test-db', async (req, res) => { 
-  try { // Intentar conectarse a la base de datos
-    const client = await pool.connect(); // Obtener un cliente de la piscina
-    const result = await client.query('SELECT NOW()'); // Ejecutar una consulta de prueba
-    client.release(); // Liberar el cliente
-    return res.send(result.rows); // Enviar la respuesta
-  } catch (err) { // Manejar errores
-    console.error(err);
-    return res.status(500).send('Error connecting to the database');
-  }
-});
-
-// Devuelve la lista de alumnos asociados a un profesor logeado con filtros opcionales
-app.get('/alumnos/', checkToken, async (req, res) => {
-  const idProfesor = req.userId;
-  const page = parseInt(req.query.page) || 1; // Página actual
-  const pageSize = parseInt(req.query.page_size) || 16; // Tamaño de página
-  const filterBy = req.query.filter_by || null; // Campo a filtrar (nombre, apellidos, curso)
-  const query = req.query.query || ''; // Valor del filtro
-  const offset = (page - 1) * pageSize; // Calcular el desplazamiento
-
-  if (!idProfesor) {
-    return res.status(401).send('Unauthorized');
-  }
-
+// Middleware para comprobar si el usuario es admin
+const checkAdmin = (req, res, next) => {
   try {
-    const client = await pool.connect();
-
-    let filterCondition = '';
-    const filterParams = [idProfesor];
-
-    // Construir la condición de filtro si se proporciona un filtro
-    if (filterBy && query) {
-      if (!['nombre', 'apellidos', 'curso'].includes(filterBy)) {
-        client.release();
-        return res.status(400).send('Invalid filter field'); // Validar que el campo de filtro sea válido
-      }
-      filterCondition = `AND LOWER(alumnos.${filterBy}) LIKE $2`;
-      filterParams.push(`%${query.toLowerCase()}%`);
-    }
-
-    // Consulta para obtener los alumnos con paginación y filtro
-    const result = await client.query(
-      `SELECT alumnos.* 
-       FROM alumnos 
-       JOIN profesor_alumno ON alumnos.id_alumno = profesor_alumno.id_alumno 
-       WHERE profesor_alumno.id_profesor = $1
-       ${filterCondition}
-       LIMIT $${filterParams.length + 1} OFFSET $${filterParams.length + 2}`,
-      [...filterParams, pageSize, offset]
-    );
-
-    // Consulta para obtener el número total de alumnos (con o sin filtro)
-    const totalResult = await client.query(
-      `SELECT COUNT(*) AS total 
-       FROM alumnos 
-       JOIN profesor_alumno ON alumnos.id_alumno = profesor_alumno.id_alumno 
-       WHERE profesor_alumno.id_profesor = $1
-       ${filterCondition}`,
-      filterParams
-    );
-
-    client.release();
-
-    const totalAlumnos = parseInt(totalResult.rows[0].total);
-    const totalPages = Math.ceil(totalAlumnos / pageSize);
-
-    return res.status(200).json({
-      alumnos: result.rows,
-      totalPages,
-    });
+    const authHeader = req.get('Authorization');
+    if (!authHeader) return res.status(401).send('Unauthorized');
+    const token = authHeader.split(' ')[1];
+    const payload = jwt.verify(token, JWT_SECRET);
+    if (payload.rol !== 'admin') return res.status(403).send('Forbidden: Admins only');
+    req.userId = payload.userId;
+    next();
   } catch (err) {
-    console.error('Error fetching alumnos:', err.message);
-    res.status(500).send('Error fetching alumnos');
+    return res.status(403).send('Invalid or expired token');
   }
-});
+};
 
-// Devuelve las estadísticas de un alumno
-app.get('/alumnos/:id_alumno', checkToken, async (req, res) => { //req: request, res: response
-  const idAlumno = parseInt(req.params.id_alumno, 10); // Asegúrate de que idAlumno sea un número entero
-  const idProfesor = req.userId; // Obtener el id del profesor del token JWT
-
-  if (!idProfesor) { // Si no se proporcionó un id de profesor
-    return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado 
-  }
-
-  if (isNaN(idAlumno)) {
-    return res.status(400).send('Invalid student ID'); // Valida que idAlumno sea un número válido
-  }
-
-  try { // Intentar obtener las estadísticas del alumno
-    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
-    const result = await client.query( // Ejecutar una consulta para obtener las estadísticas del alumno
-      'SELECT alumnos.*, ejercicios.* FROM alumnos LEFT JOIN ejercicios ON alumnos.id_alumno = ejercicios.id_alumno WHERE alumnos.id_alumno = $1',
-      [idAlumno]
-    );
-    client.release(); // Liberar el cliente
-    if (result.rows.length === 0) { // Si no se encontraron estadísticas del alumno
-      return res.status(404).send('No se encontraron estadísticas'); // Enviar un mensaje de error de no se encontraron estadísticas
-    }
-    return res.status(200).json(result.rows); // Enviar las estadísticas del alumno en la respuesta
-  } catch (err) { // Manejar errores
-    console.error(err);
-    return res.status(500).send('Error fetching stats');
-  }
-});
-
-//Devuelve datos del profesor logeado
-app.get('/profile', checkToken, async (req, res) => { //req: request, res: response
-  const idProfesor = req.userId; // Obtener el id del profesor del token JWT
-
-  if (!idProfesor) { // Si no se proporcionó un id de profesor
-    return res.status(401).send('Unauthorized'); // Enviar un mensaje de error de no autorizado
-  }
-
-  try { // Intentar obtener los datos del perfil del profesor
-    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
-    const result = await client.query('SELECT nombre, apellidos, email FROM profesores WHERE id_profesor = $1', [idProfesor]); // Ejecutar una consulta para obtener los datos del perfil del profesor
-    client.release(); // Liberar el cliente
-
-    if (result.rows.length === 0) { // Si no se encontraron datos del perfil del profesor
-      return res.status(404).send('Profile not found'); // Enviar un mensaje de error de perfil no encontrado
-    }
-
-    res.status(200).json(result.rows[0]); // Enviar los datos del perfil del profesor en la respuesta
-  } catch (err) { // Manejar errores
-    console.error(err);
-    res.status(500).send('Error fetching profile');
-  }
-});
-
-// ############################################################################################################################
-// POST
-// ############################################################################################################################
-
-// Ruta de registro de un nuevo usuario (profesor)
-app.post('/signup', async (req, res) => { //req: request, res: response
-  const { email, nombre, apellidos, password } = req.body; // Obtener las credenciales del cuerpo de la solicitud
-  try {
-    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
-    // Comprobar si el email ya existe
-    const exists = await client.query('SELECT 1 FROM profesores WHERE email = $1', [email]);
-    if (exists.rows.length > 0) {
-      client.release();
-      return res.status(409).json({ error: 'Email already exists' }); // Error específico para frontend
-    }
-    // Generar hash solo si el email no existe
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await client.query(
-      'INSERT INTO profesores (email, nombre, apellidos, password) VALUES ($1, $2, $3, $4) RETURNING id_profesor',
-      [email, nombre, apellidos, hashedPassword]
-    );
-    client.release();
-    return res.status(201).json({ userId: result.rows[0].id_profesor });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Error registering new user' });
-  }
-});
-
-// Ruta de login de un usuario (profesor)
-app.post('/login', async (req, res) => { //req: request, res: response
-  const { email, password } = req.body; // Obtener las credenciales del cuerpo de la solicitud
-
-  try { // Intentar buscar al usuario en la base de datos
-    const client = await pool.connect(); // Obtener un cliente del pool de conexiones
-    const result = await client.query('SELECT * FROM profesores WHERE email = $1', [email]); // Buscar al usuario por su correo electrónico
-    if (result.rows.length === 0) { // Si no se encontró al usuario
-      client.release();
-      return res.status(401).send('Invalid credentials'); // Enviar un mensaje de error de credenciales inválidas
-    }
-
-    const profesor = result.rows[0]; // Obtener al usuario de la base de datos
-    // Comparar la contraseña proporcionada con la contraseña almacenada en la base de datos
-    if (await bcrypt.compare(password, profesor.password)) {
-      // Generar un token JWT para el usuario
-      const token = jwt.sign({ userId: profesor.id_profesor }, JWT_SECRET, { expiresIn: '1h' }); // El token expira en 1 hora
-      client.release();
-      return res.status(200).json({ token }); // Enviar el token al cliente en la respuesta
-    } else { // Si las contraseñas no coinciden
-      client.release();
-      return res.status(401).send('Invalid credentials'); // Enviar un mensaje de error de credenciales inválidas
-    }
-  } catch (err) { // Manejar errores
-    console.error(err);
-    return res.status(500).send('Error logging in'); // Enviar un mensaje de error de inicio de sesión
-  }
-});
-
-// Ruta para cambiar la contraseña
-app.post('/change-password', checkToken, async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
-  const idProfesor = req.userId;
-
-  if (!currentPassword || !newPassword) {
-    return res.status(400).send('Current and new passwords are required');
-  }
-
-  try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT password FROM profesores WHERE id_profesor = $1', [idProfesor]);
-
-    if (result.rows.length === 0) {
-      client.release();
-      return res.status(404).send('User not found');
-    }
-
-    const isMatch = await bcrypt.compare(currentPassword, result.rows[0].password);
-    if (!isMatch) {
-      client.release();
-      return res.status(401).send('Current password is incorrect');
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await client.query('UPDATE profesores SET password = $1 WHERE id_profesor = $2', [hashedPassword, idProfesor]);
-    client.release();
-
-    return res.status(200).send('Password changed successfully');
-  } catch (err) {
-    console.error('Error changing password:', err.message);
-    return res.status(500).send('Error changing password');
-  }
-});
 
 // ############################################################################################################################
 
@@ -279,3 +96,26 @@ app.post('/change-password', checkToken, async (req, res) => {
 app.listen(PORT, HOST, () => {
   console.log(`Servidor escuchando en http://${HOST}:${PORT}`);
 });
+// LLMS API endpoint
+const llmsRouter = require('./routes/LLMS');
+app.use('/ask', llmsRouter);
+
+// Rutas de alumnos
+const alumnosRouter = require('./routes/alumnos');
+app.use('/alumnos', alumnosRouter);
+
+// Rutas de profesores
+const profesoresRouter = require('./routes/profesores');
+app.use('/profesores', profesoresRouter);
+
+// Rutas de autenticación
+const authRouter = require('./routes/auth');
+app.use('/', authRouter);
+
+// Rutas de profesor-alumno
+const profesorAlumnoRouter = require('./routes/profesorAlumno');
+app.use('/profesor-alumno', profesorAlumnoRouter);
+
+// Rutas de pruebas
+const testRouter = require('./routes/test');
+app.use('/', testRouter);

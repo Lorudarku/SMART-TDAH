@@ -11,7 +11,8 @@ import { backendUrl } from '../../utils/constants';
 import { useLanguage } from '../../hooks/LanguageContext';
 import messages from '../../utils/translations.json';
 import { Box, FormControl, InputLabel, MenuItem, Select, TextField, Paper, Typography, Button,
-   useTheme } from '@mui/material';
+  useTheme } from '@mui/material';
+import AddAlumnoButton from './AddAlumnoButton';
 import useDebounce from '../../hooks/useDebounce';
 
 // =====================
@@ -145,7 +146,29 @@ const Paginator = ({ currentPage, totalPages, onPrevious, onNext, language }) =>
 // =============================
 // Componente principal AlumnoList
 // =============================
+
 function AlumnoList() {
+  // --- Estado para saber si el profesor puede gestionar alumnos ---
+  const [puedeGestionarAlumnos, setPuedeGestionarAlumnos] = useState(false);
+  useEffect(() => {
+    const fetchPermiso = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res = await axios.get(`${backendUrl}/profile`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data && res.data.puede_gestionar_alumnos === true) {
+          setPuedeGestionarAlumnos(true);
+        } else {
+          setPuedeGestionarAlumnos(false);
+        }
+      } catch {
+        setPuedeGestionarAlumnos(false);
+      }
+    };
+    fetchPermiso();
+  }, []);
   // --- Estado de la lista de alumnos ---
   const [alumnos, setAlumnos] = useState([]);
   // --- Estado de los colores asignados a cada alumno (persistente en localStorage) ---
@@ -314,6 +337,8 @@ function AlumnoList() {
               alumnoData={alumno}
               backgroundColor={alumnoColors[alumno.idAlumno]}
               isLoggedIn={true}
+              puedeGestionarAlumnos={puedeGestionarAlumnos}
+              onAlumnoDeleted={fetchAlumnos}
             />
           ))}
         </Box>
@@ -326,6 +351,11 @@ function AlumnoList() {
           language={language}
         />
       </Paper>
+      {/* Botón para añadir alumnos solo si el profesor tiene permiso */}
+      <AddAlumnoButton 
+        visible={puedeGestionarAlumnos} 
+        onAlumnoAdded={fetchAlumnos}
+      />
     </Box>
   );
 }

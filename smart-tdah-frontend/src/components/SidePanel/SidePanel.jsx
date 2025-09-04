@@ -1,14 +1,16 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { IconButton, Divider, Toolbar, useTheme } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { IconButton, Divider, Toolbar, useTheme, Tooltip } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ChatIcon from '@mui/icons-material/Chat';
 import { useLanguage } from '../../hooks/LanguageContext';
 import messages from '../../utils/translations.json';
+import { getUserRole } from '../../utils/auth';
 
 // =====================
-// Estilos centralizados
+// Estilos centralizados y documentados
 // =====================
 // Todos los estilos visuales del componente están aquí agrupados y documentados.
 const sidePanelSx = (theme) => ({
@@ -65,6 +67,28 @@ const buttonSx = (theme) => ({
   },
 });
 
+/**
+ * Estilo especial para el icono de chat:
+ * - Por defecto: color de hover de los otros botones (primary.main)
+ * - En hover: color base de los otros botones (text.primary)
+ * - Siempre es más pequeño que el resto
+ * - Transición suave
+ */
+const chatIconSx = (theme) => ({
+  fontSize: 22, // más pequeño que el resto
+  color: theme.palette.primary.main, // color de hover por defecto
+  opacity: 1,
+  transition: 'font-size 0.2s, color 0.2s, opacity 0.2s',
+  [theme.breakpoints.down('sm')]: {
+    fontSize: 18,
+  },
+  // En hover: color base de los otros botones
+  '.MuiIconButton-root:hover &': {
+    color: theme.palette.text.primary,
+    opacity: 1,
+  },
+});
+
 const dividerSx = (theme) => ({
   width: 40,
   height: 2,
@@ -83,11 +107,19 @@ const settingsContainerSx = {
   marginTop: 'auto',
 };
 
-const SidePanel = () => {
+/**
+ * SidePanel: barra lateral de navegación.
+ * Si se recibe onChatClick y estamos en AlumnoData, muestra el botón de chat.
+ */
+const SidePanel = ({ onChatClick }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
-  const theme = useTheme(); // Acceso al tema actual (claro/oscuro)
-  // Usamos sx con funciones para breakpoints MUI
+  const theme = useTheme();
+
+  // Detecta si estamos en la ruta de AlumnoData (ej: /alumnos/123)
+  const isAlumnoData = /^\/alumnos\/[0-9]+$/.test(location.pathname);
+
   return (
     <Toolbar sx={sidePanelSx(theme)}>
       {/* Botón de inicio en la parte superior */}
@@ -99,11 +131,30 @@ const SidePanel = () => {
       {/* separación */}
       <Divider sx={dividerSx(theme)} />
 
-      {/* Botón para la lista de alumnos */}
-      <IconButton onClick={() => navigate('/alumnos')}>
+      {/* Botón para la lista de alumnos o profesores según rol */}
+      <IconButton
+        onClick={() => {
+          const rol = getUserRole();
+          if (rol === 'admin') {
+            navigate('/profesores');
+          } else {
+            navigate('/alumnos');
+          }
+        }}
+      >
         <ListAltIcon sx={buttonSx(theme)} />
         <span style={{ fontSize: 10 }}>{messages[language]?.students}</span>
       </IconButton>
+
+      {/* Botón de chat solo visible en AlumnoData */}
+      {isAlumnoData && typeof onChatClick === 'function' && (
+        <Tooltip title={messages[language]?.chatTitle || 'Chat'} placement="right">
+          <IconButton onClick={onChatClick} sx={{ mt: 2 }}>
+            {/* Icono de chat especial: más pequeño y destacado */}
+            <ChatIcon sx={chatIconSx(theme)} />
+          </IconButton>
+        </Tooltip>
+      )}
 
       {/* separación y ajustes en la parte inferior */}
       <div style={settingsContainerSx}>

@@ -19,7 +19,6 @@
 /smart-tdah-frontend/*.txt
 /.pnp
 .pnp.js
-*.md
 
 # testing
 /coverage
