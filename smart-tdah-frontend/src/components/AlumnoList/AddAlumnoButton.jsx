@@ -64,6 +64,8 @@ const AddAlumnoButton = ({ visible, onAlumnoAdded }) => {
       if (onAlumnoAdded) onAlumnoAdded();
       // Elimina el alumno de la lista local
       setAlumnosDisponibles((prev) => prev.filter(a => a.id_alumno !== id_alumno));
+      // Añade el id_alumno al array de alumnosIdsProfesor para que la UI muestre el estado "Añadido"
+      setAlumnosIdsProfesor((prev) => [...prev, id_alumno]);
     } catch (err) {
       setError(messages[language]?.addAlumnoError || 'Error al añadir alumno');
     } finally {
@@ -84,7 +86,7 @@ const AddAlumnoButton = ({ visible, onAlumnoAdded }) => {
     setLoading(true);
     setError('');
     const token = localStorage.getItem('token');
-  axios.get(`${backendUrl}/add-alumnos/buscar`, {
+  axios.get(`${backendUrl}/alumnos/add-alumnos/buscar`, {
       headers: { Authorization: `Bearer ${token}` },
       params: { email: debouncedEmail },
     })

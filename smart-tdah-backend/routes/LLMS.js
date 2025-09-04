@@ -120,9 +120,9 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     /**
-     * Consulta a la API de Groq para modelos GPT-3.5-turbo, Llama 3 y Mixtral
+     * Consulta a la API de Groq para modelo Llama 3
      * @param {string} prompt
-     * @param {string} model - 'llama-3.3-70b-versatile' o 'mistral-saba-24b'
+     * @param {string} model - 'llama-3.3-70b-versatile'
      * Usa la URL específica según el modelo solicitado
      */
     const askGroqAI = async (prompt, model) => {
@@ -386,15 +386,15 @@ router.post('/', authenticateToken, async (req, res) => {
     console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n')
     writeLog('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n');
 
-    // --- Validación de seguridad: solo permitir consultas de lectura (SELECT) ---
-    const forbidden = /\b(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|TRUNCATE|REPLACE|GRANT|REVOKE|COMMENT|MERGE|CALL|EXECUTE|DESCRIBE|EXPLAIN|SET|SHOW|USE|ATTACH|DETACH|VACUUM|REINDEX|ANALYZE|CLUSTER|DISCARD|LOCK|UNLOCK|RENAME|COPY|SECURITY|OWNER|INDEX|SEQUENCE|TRIGGER|FUNCTION|PROCEDURE|VIEW|MATERIALIZED|TABLESPACE|DATABASE|SCHEMA|EXTENSION|UNLOGGED|TEMP|TEMPORARY|UNIQUE|PRIMARY|FOREIGN|REFERENCES|CONSTRAINT|CHECK|DEFAULT|INTO|VALUES|DO|BEGIN|END|DECLARE|CURSOR|FETCH|MOVE|CLOSE|OPEN|LISTEN|NOTIFY|UNLISTEN|ABORT|COMMIT|ROLLBACK|SAVEPOINT|RELEASE|PREPARE|EXECUTE|DEALLOCATE|ANALYZE|CLUSTER|DISCARD|LOCK|UNLOCK|RENAME|COPY|SECURITY|OWNER|INDEX|SEQUENCE|TRIGGER|FUNCTION|PROCEDURE|VIEW|MATERIALIZED|TABLESPACE|DATABASE|SCHEMA|EXTENSION|UNLOGGED|TEMP|TEMPORARY|UNIQUE|PRIMARY|FOREIGN|REFERENCES|CONSTRAINT|CHECK|DEFAULT|INTO|VALUES|DO|BEGIN|END|DECLARE|CURSOR|FETCH|MOVE|CLOSE|OPEN|LISTEN|NOTIFY|UNLISTEN|ABORT|COMMIT|ROLLBACK|SAVEPOINT|RELEASE|PREPARE|EXECUTE|DEALLOCATE)\b/i;
-    if (!query.trim().toUpperCase().startsWith('SELECT') || forbidden.test(query)) {
-      writeLog('Bloqueada consulta SQL potencialmente peligrosa: ' + query);
-      return res.status(400).json({ error: 'Consulta SQL bloqueada por motivos de seguridad.' });
-    }
-
     let data;
     if (!query.includes("unnecessary")) {
+      // --- Validación de seguridad: solo permitir consultas de lectura (SELECT) ---
+      // Solo bloquear comandos que modifican la base de datos
+      const forbidden = /\b(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|TRUNCATE|REPLACE|GRANT|REVOKE)\b/i;
+      if (!query.trim().toUpperCase().startsWith('SELECT') || forbidden.test(query)) {
+        writeLog('Bloqueada consulta SQL potencialmente peligrosa: ' + query);
+        return res.status(400).json({ error: 'Consulta SQL bloqueada por motivos de seguridad.' });
+      }
       data = await getDataByQuery(query)
     }
     const answer = await proccessData(data, !query.includes("unnecessary"))
