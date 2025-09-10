@@ -13,11 +13,11 @@
 
 ## Galego
 
-> SMART-TDAH: Software para Análise Intelixente de Datos e Apoio ao Seguimento de Estudantes con TDAH. Desenvolto como Traballo de Fin de Grao (TFG Solidario) por Ángel Álvarez Rey, na mención de Computación do Grao en Enxeñaría Informática da Universidade da Coruña, dentro do programa TFGs Solidarios da Cátedra NTTData Diversidade. O proxecto contou coa avaliación de resultados por parte de profesores expertos en TDAH en colaboración co Concello de Barão de Grajaú (Brasil).
+> SMART-TDAH: Software para Análise Intelixente de Datos e Apoio ao Seguimento de Estudantes con TDAH. Desenvolto como Traballo de Fin de Grao (TFG Solidario / Aprendizaxe-Servizo) por Ángel Álvarez Rey, na mención de Computación do Grao en Enxeñaría Informática da Universidade da Coruña, dentro do programa TFGs Solidarios da Cátedra NTTData Diversidade. O proxecto contou coa avaliación de resultados por parte de profesores expertos en TDAH en colaboración cos Concellos de Barão de Grajaú (Brasil) e Floriano (Brasil). 
+> 
+> Todo o código fonte está dispoñíbel baixo licenza libre **GNU General Public License v3.0 (GPLv3)**.
 
----
-
-## Índice
+### Índice
 
 1. [Descrición xeral](#descrición-xeral)
 2. [Arquitectura do proxecto](#arquitectura-do-proxecto)
@@ -29,9 +29,7 @@
 8. [Tecnoloxías empregadas](#tecnoloxías-empregadas)
 9. [Código fonte](#código-fonte)
 
----
-
-## Descrición xeral
+### Descrición xeral
 
 SMART-TDAH é unha **plataforma web educativa** que permite a docentes xestionar, visualizar e analizar o progreso de alumnos con TDAH mediante a visualización de resultados de exercicios e estatísticas.
 
@@ -44,9 +42,7 @@ Inclúe:
 
 O proxecto segue o patrón **MVC (Modelo-Vista-Controlador)** e conecta frontend e backend mediante unha base de datos PostgreSQL migrada desde Firebase.
 
----
-
-## Arquitectura do proxecto
+### Arquitectura do proxecto
 
 **Modelo MVC cliente-servidor:**
 
@@ -57,9 +53,7 @@ O proxecto segue o patrón **MVC (Modelo-Vista-Controlador)** e conecta frontend
 | Base de datos | PostgreSQL             | Almacenamento de usuarios, alumnos, exercicios e resultados    |
 | APIs externas | Gemini, LLaMA, Mixtral | Respostas do chatbot, consultas avanzadas de datos             |
 
----
-
-## Requisitos previos
+### Requisitos previos
 
 * Node.js >= 18.x
 * npm >= 9.x
@@ -67,14 +61,15 @@ O proxecto segue o patrón **MVC (Modelo-Vista-Controlador)** e conecta frontend
 * Git
 * (Opcional) Docker para despregue
 
----
-
-## Instalación
+### Instalación
 
 ```bash
-# Clona o repositorio
-git clone https://github.com/Lorudarku/SMART-TDAH
-cd SMART-TDAH
+# Clona o repositorio oficial da Cátedra
+git clone https://github.com/TsolidarioFG/2025-Barao-de-Grajau.git
+# Alternativamente, podes clonar o meu repositorio persoal (ambos teñen o mesmo proxecto)
+# git clone https://github.com/Lorudarku/SMART-TDAH.git
+
+cd 2025-Barao-de-Grajau
 
 # Backend
 cd smart-tdah-backend
@@ -85,9 +80,7 @@ cd ../smart-tdah-frontend
 npm install
 ```
 
----
-
-## Execución en local
+### Execución en local
 
 1. **Configura a base de datos PostgreSQL**
 
@@ -111,9 +104,7 @@ npm start
 
 * URL por defecto: `http://localhost:3000`
 
----
-
-## Estrutura dos directorios
+### Estrutura dos directorios
 
 ```
 SMART-TDAH/
@@ -136,23 +127,17 @@ SMART-TDAH/
 * `pages/`: páxinas principais da aplicación.
 * `utils/` e `hooks/`: utilidades e hooks personalizados.
 
----
-
-## Tecnoloxías empregadas
+### Tecnoloxías empregadas
 
 * **Frontend:** React, Material UI, Axios, Recharts, date-fns, pdfmake.
 * **Backend:** Node.js, Express, PostgreSQL, bcrypt, dotenv.
 * **APIs externas:** Gemini, LLaMA, Mixtral (requiren clave).
 * **Control de versións:** Git, GitHub
 
----
 
-## Código fonte
+### Código fonte
 
-O código fonte do proxecto está **dispoñible de forma gratuíta** no meu repositorio público:
-[https://github.com/Lorudarku/SMART-TDAH](https://github.com/Lorudarku/SMART-TDAH)
-
-Este repositorio promove **transparencia, reproducibilidade científica e reutilización educativa**.
+Todo o código fonte está dispoñíbel de forma gratuíta nos repositorios do proxecto (ver sección de instalación) e baixo licenza libre **GPL v3.0**, promovendo transparencia, reproducibilidade científica e posible reutilización educativa.
 
 ---
 
@@ -160,7 +145,9 @@ Este repositorio promove **transparencia, reproducibilidade científica e reutil
 
 ## Castellano
 
-> SMART-TDAH: Software para el Análisis Inteligente de Datos y Apoyo al Seguimiento de Estudiantes con TDAH. Desarrollado como Trabajo de Fin de Grado (TFG Solidario) por Ángel Álvarez Rey, en la mención de Computación del Grado en Ingeniería Informática de la Universidad de A Coruña, dentro del programa TFGs Solidarios de la Cátedra NTTData Diversidad. El proyecto contó con la evaluación de resultados por parte de profesores expertos en TDAH en colaboración con el Ayuntamiento de Barão de Grajaú (Brasil).
+> SMART-TDAH: Software para Análisis Inteligente de Datos y Apoyo al Seguimiento de Estudiantes con TDAH. Desarrollado como Trabajo de Fin de Grado (TFG Solidario / Aprendizaje-Servicio) por Ángel Álvarez Rey, en la mención de Computación del Grado en Ingeniería Informática de la Universidad de La Coruña, dentro del programa TFGs Solidarios de la Cátedra NTTData Diversidad. El proyecto contó con la evaluación de resultados por parte de profesores expertos en TDAH en colaboración con los Ayuntamientos de Barão de Grajaú (Brasil) y Floriano (Brasil).
+> 
+> Todo el código fuente está disponible bajo licencia libre **GNU General Public License v3.0 (GPLv3)**.
 
 ### Índice
 
@@ -209,9 +196,12 @@ El proyecto sigue el patrón **MVC (Modelo-Vista-Controlador)** y conecta fronte
 ### Instalación
 
 ```bash
-# Clona el repositorio
-git clone https://github.com/Lorudarku/SMART-TDAH
-cd SMART-TDAH
+# Clona el repositorio oficial de la Cátedra
+git clone https://github.com/TsolidarioFG/2025-Barao-de-Grajau.git
+# Alternativamente, puedes clonar mi repositorio personal (ambos tienen el mismo proyecto)
+# git clone https://github.com/Lorudarku/SMART-TDAH.git
+
+cd 2025-Barao-de-Grajau
 
 # Backend
 cd smart-tdah-backend
@@ -278,10 +268,7 @@ SMART-TDAH/
 
 ### Código fuente
 
-El código fuente del proyecto está **disponible de forma gratuita** en mi repositorio público:
-[https://github.com/Lorudarku/SMART-TDAH](https://github.com/Lorudarku/SMART-TDAH)
-
-Este repositorio promueve **transparencia, reproducibilidad científica y reutilización educativa**.
+Todo el código fuente del proyecto está **disponible de forma gratuita** en los repositorios del proyecto (ver sección de instalación) y bajo licencia libre **GPL v3.0**, promoviendo la transparencia, la reproducibilidad científica y su posible reutilización educativa.
 
 ---
 
@@ -289,7 +276,9 @@ Este repositorio promueve **transparencia, reproducibilidad científica y reutil
 
 ## English
 
-> SMART-TDAH: Software for Intelligent Data Analysis and Support for Monitoring Students with ADHD. Developed as a Bachelor’s Thesis (Solidarity TFG) by Ángel Álvarez Rey, in the Computing specialization of the Degree in Computer Engineering at the University of A Coruña, within the Solidarity TFGs program of the NTTData Diversity Chair. The project’s results were evaluated by professors with expertise in ADHD in collaboration with the Municipality of Barão de Grajaú (Brazil).
+> SMART-TDAH: Software for Intelligent Data Analysis and Support for Monitoring Students with ADHD. Developed as a Final Degree Project (Solidarity FYP / Service-Learning) by Ángel Álvarez Rey, in the Computer Science specialization of the Degree in Computer Engineering at the University of A Coruña, within the Solidarity FYP program of the NTTData Diversity Chair. The project included evaluation of results by expert teachers in ADHD in collaboration with the municipalities of Barão de Grajaú (Brazil) and Floriano (Brazil).
+> 
+> All source code is available under the free license **GNU General Public License v3.0 (GPLv3)**.
 
 ### Index
 
@@ -338,9 +327,12 @@ The project follows the **MVC (Model-View-Controller)** pattern and connects fro
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/Lorudarku/SMART-TDAH
-cd SMART-TDAH
+# Clone the official repository from the Chair
+git clone https://github.com/TsolidarioFG/2025-Barao-de-Grajau.git
+# Alternatively, you can clone my personal repository  (both have the same project)
+# git clone https://github.com/Lorudarku/SMART-TDAH.git
+
+cd 2025-Barao-de-Grajau
 
 # Backend
 cd smart-tdah-backend
@@ -405,12 +397,9 @@ SMART-TDAH/
 * **External APIs:** Gemini, LLaMA, Mixtral (require key).
 * **Version control:** Git, GitHub
 
-### Source code
+### Source Code
 
-The project source code is **freely available** in my public repository:
-[https://github.com/Lorudarku/SMART-TDAH](https://github.com/Lorudarku/SMART-TDAH)
-
-This repository promotes **transparency, scientific reproducibility, and educational reuse**.
+All the source code of the project is **freely available** in the project repositories (see installation section) under the free license **GPL v3.0**, fostering transparency, scientific reproducibility, and potential educational reuse.
 
 ---
 
@@ -418,7 +407,9 @@ This repository promotes **transparency, scientific reproducibility, and educati
 
 ## Português
 
-> SMART-TDAH: Software para Análise Inteligente de Dados e Apoio ao Acompanhamento de Estudantes com TDAH. Desenvolvido como Trabalho de Fim de Curso (TFG Solidário) por Ángel Álvarez Rey, na menção de Computação do Grau em Engenharia Informática da Universidade da Corunha, no âmbito do programa TFGs Solidários da Cátedra NTTData Diversidade. O projeto contou com a avaliação dos resultados por professores especializados em TDAH em colaboração com o Município de Barão de Grajaú (Brasil).
+> SMART-TDAH: Software para Análise Inteligente de Dados e Apoio ao Acompanhamento de Estudantes com TDAH. Desenvolvido como Trabalho de Conclusão de Curso (TCC Solidário / Aprendizagem-Serviço) por Ángel Álvarez Rey, na especialização em Computação do Curso de Engenharia da Computação da Universidade da Corunha, dentro do programa TCCs Solidários da Cátedra NTTData Diversidade. O projeto contou com a avaliação dos resultados por parte de professores especialistas em TDAH em colaboração com os Municípios de Barão de Grajaú (Brasil) e Floriano (Brasil).
+> 
+> Todo o código-fonte está disponível sob licença livre **GNU General Public License v3.0 (GPLv3)**.
 
 ### Índice
 
@@ -467,9 +458,12 @@ O projeto segue o padrão **MVC (Modelo-Visão-Controlador)** e conecta frontend
 ### Instalação
 
 ```bash
-# Clona o repositório
-git clone https://github.com/Lorudarku/SMART-TDAH
-cd SMART-TDAH
+# Clone o repositório oficial da Cátedra
+git clone https://github.com/TsolidarioFG/2025-Barao-de-Grajau.git
+# Alternativamente, você pode clonar o meu repositório pessoal (ambos têm o mesmo projeto)
+# git clone https://github.com/Lorudarku/SMART-TDAH.git
+
+cd 2025-Barao-de-Grajau
 
 # Backend
 cd smart-tdah-backend
@@ -536,7 +530,4 @@ SMART-TDAH/
 
 ### Código-fonte
 
-O código-fonte do projeto está **disponível gratuitamente** no meu repositório público:
-[https://github.com/Lorudarku/SMART-TDAH](https://github.com/Lorudarku/SMART-TDAH)
-
-Este repositório promove **transparência, reprodutibilidade científica e reutilização educacional**.
+Todo o código-fonte do projeto está **disponível gratuitamente** nos repositórios do projeto (ver seção de instalação) e sob licença livre **GPL v3.0**, promovendo transparência, reprodutibilidade científica e possível reutilização educacional.

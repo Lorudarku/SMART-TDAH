@@ -274,7 +274,7 @@ router.post('/', authenticateToken, async (req, res) => {
         console.log('------------- Preprompting 1 + pregunta usuario + historial mensajes --------------')
         writeLog('------------- Preprompting 1 + pregunta usuario + historial mensajes --------------');
         console.log(prompt)
-        writeLog(prompt);
+        // writeLog(prompt);
         console.log('-----------------------------------------------------------------------------------\n')
         writeLog('-----------------------------------------------------------------------------------\n');
 
@@ -353,7 +353,8 @@ router.post('/', authenticateToken, async (req, res) => {
         console.log('------------- Preprompting 2 + pregunta usuario + datos recuperados de BBDD -------------')
         writeLog('------------- Preprompting 2 + pregunta usuario + datos recuperados de BBDD -------------');
         console.log(prompt)
-        writeLog(prompt);
+        // writeLog(prompt);
+        writeLog(JSON.stringify(data));
         console.log('----------------------------------------------------------------------------------------\n')
         writeLog('----------------------------------------------------------------------------------------\n');
 
@@ -391,7 +392,7 @@ router.post('/', authenticateToken, async (req, res) => {
       // --- Validación de seguridad: solo permitir consultas de lectura (SELECT) ---
       // Solo bloquear comandos que modifican la base de datos
       const forbidden = /\b(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|TRUNCATE|REPLACE|GRANT|REVOKE)\b/i;
-      if (!query.trim().toUpperCase().startsWith('SELECT') || forbidden.test(query)) {
+      if (!/^\s*(SELECT|WITH)\b/i.test(query) || forbidden.test(query)) {
         writeLog('Bloqueada consulta SQL potencialmente peligrosa: ' + query);
         return res.status(400).json({ error: 'Consulta SQL bloqueada por motivos de seguridad.' });
       }
