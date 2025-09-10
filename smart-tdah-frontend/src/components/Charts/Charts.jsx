@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import React, { memo, useEffect, useState, useRef, useCallback } from "react";
 import { Box, Button, Checkbox, Container, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, Typography, useTheme } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";

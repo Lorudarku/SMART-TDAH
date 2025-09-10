@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import React, { memo } from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { format } from "date-fns";

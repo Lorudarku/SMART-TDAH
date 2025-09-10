@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 // =============================
 // Componente Banner.jsx
 // =============================

@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import { useState, useEffect } from 'react';
 
 // =====================
@@ -7,7 +9,7 @@ import { useState, useEffect } from 'react';
 /**
  * useDebounce
  * Retorna un valor debounced tras un retardo especificado.
- * @param {any} value - Valor a debounciar.
+ * @param {any} value - Valor a debouncear.
  * @param {number} delay - Tiempo de espera en ms antes de actualizar el valor.
  * @returns {any} Valor debounced.
  */

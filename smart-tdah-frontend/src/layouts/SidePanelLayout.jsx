@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import SidePanel from "../components/SidePanel/SidePanel";
 import { useTheme } from "@mui/material/styles";
 

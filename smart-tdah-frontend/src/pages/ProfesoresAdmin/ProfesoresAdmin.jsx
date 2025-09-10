@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { backendUrl } from '../../utils/constants';

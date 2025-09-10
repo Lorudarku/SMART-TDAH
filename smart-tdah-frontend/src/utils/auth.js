@@ -1,3 +1,6 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
+
 // utils/auth.js
 // Funciones para obtener y decodificar el rol del usuario desde el token JWT
 

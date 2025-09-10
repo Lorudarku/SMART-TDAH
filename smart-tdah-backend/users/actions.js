@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import * as actionTypes from "./actionTypes";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";

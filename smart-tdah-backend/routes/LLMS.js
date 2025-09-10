@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 /********************************************************************
  *  Endpoint seguro para consultas a Gemini API (en el futuro a más modelos)
  *  No almacena historial, solo reenvía la consulta y devuelve la
@@ -84,9 +86,7 @@ router.post('/', authenticateToken, async (req, res) => {
       console.log('--- askAI: modelo seleccionado:', IaModel);
       writeLog(`--- askAI: modelo seleccionado: ${IaModel}`);
       if (IaModel === 'gemini') return askGeminiAI(prompt);
-      // if (IaModel === 'groq-gpt') return askGroqAI(prompt, 'gpt-3.5-turbo-0125');
       if (IaModel === 'groq-llama') return askGroqAI(prompt, 'llama-3.3-70b-versatile');
-      // if (IaModel === 'groq-mixtral') return askGroqAI(prompt, 'mistral-saba-24b');
       if (IaModel === 'mixtral') return askMistralAI(prompt);
       // Fallback seguro
       return askGeminiAI(prompt);

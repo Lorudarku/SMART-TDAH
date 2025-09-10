@@ -1,3 +1,6 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
+
 // Locale gallego para date-fns (adaptado de https://github.com/date-fns/date-fns/blob/main/src/locale/gl/index.js)
 // Solo se importa lo necesario para el selector de fechas.
 import esLocale from 'date-fns/locale/es';

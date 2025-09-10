@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 const express = require('express');
 const pool = require('../dbConfig');
 const jwt = require('jsonwebtoken');

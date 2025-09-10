@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import React from 'react';
 import Profile from '../../components/Profile/Profile';
 import ChangePasswordForm from '../../components/ChangePasswordForm/ChangePasswordForm';

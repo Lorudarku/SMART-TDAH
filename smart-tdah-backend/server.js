@@ -1,4 +1,5 @@
-
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors'); 

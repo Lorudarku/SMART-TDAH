@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { IconButton, Divider, Toolbar, useTheme, Tooltip } from '@mui/material';

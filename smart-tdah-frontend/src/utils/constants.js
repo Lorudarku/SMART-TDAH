@@ -1,3 +1,6 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
+
 // ===============================
 // Configuración de la URL base del backend
 // Lee siempre de la variable de entorno REACT_APP_BACKEND_URL

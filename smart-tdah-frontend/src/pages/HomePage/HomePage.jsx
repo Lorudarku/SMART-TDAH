@@ -1,4 +1,5 @@
-
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import React from "react";
 import { Paper, Box, Typography, useTheme } from "@mui/material";
 import messages from "../../utils/translations.json";

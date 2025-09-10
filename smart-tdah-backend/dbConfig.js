@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 const { Pool } = require('pg');
 require('dotenv').config({path: __dirname + '/.env'}); // Cargar variables de entorno desde .env 
 

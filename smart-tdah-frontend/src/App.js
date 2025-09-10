@@ -1,3 +1,5 @@
+// SMART-TDAH - Ángel Álvarez Rey
+// Licensed under GNU GPL v3.0
 import React, { useState, createContext, useMemo, useEffect } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
