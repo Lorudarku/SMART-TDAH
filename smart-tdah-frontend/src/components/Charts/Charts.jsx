@@ -5,7 +5,7 @@ import { Box, Button, Checkbox, Container, FormControl, FormControlLabel, FormGr
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { enGB, es, ptBR } from "date-fns/locale";
-import gal from '../../utils/date-fns-locale-gal';
+import gal from '../../utils/date-fns-locale-gl';
 import Chart from "./Chart";
 import TableStats from "../Table/TableStats";
 import messages from "../../utils/translations.json";
