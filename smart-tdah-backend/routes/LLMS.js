@@ -1,7 +1,7 @@
 // SMART-TDAH - Ángel Álvarez Rey
 // Licensed under GNU GPL v3.0
 /********************************************************************
- *  Endpoint seguro para consultas a Gemini API (en el futuro a más modelos)
+ *  Endpoint seguro para consultas a APIs de modelos de IA
  *  No almacena historial, solo reenvía la consulta y devuelve la
  *  respuesta. Cumple SRP y modularidad.
  ********************************************************************/
